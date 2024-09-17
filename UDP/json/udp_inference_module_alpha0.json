@@ -1,0 +1,189 @@
+{
+  "process_graph": {
+    "loaddiskdata1": {
+      "process_id": "load_disk_data",
+      "arguments": {
+        "format": "GTiff",
+        "glob_pattern": "/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_L1.tif",
+        "options": {}
+      }
+    },
+    "loaddiskdata2": {
+      "process_id": "load_disk_data",
+      "arguments": {
+        "format": "GTiff",
+        "glob_pattern": "/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_L2.tif",
+        "options": {}
+      }
+    },
+    "loaddiskdata3": {
+      "process_id": "load_disk_data",
+      "arguments": {
+        "format": "GTiff",
+        "glob_pattern": "/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_L3.tif",
+        "options": {}
+      }
+    },
+    "eq1": {
+      "process_id": "eq",
+      "arguments": {
+        "x": {
+          "from_parameter": "topology_level"
+        },
+        "y": 2
+      }
+    },
+    "if1": {
+      "process_id": "if",
+      "arguments": {
+        "accept": {
+          "from_node": "loaddiskdata2"
+        },
+        "reject": {
+          "from_node": "loaddiskdata3"
+        },
+        "value": {
+          "from_node": "eq1"
+        }
+      }
+    },
+    "eq2": {
+      "process_id": "eq",
+      "arguments": {
+        "x": {
+          "from_parameter": "topology_level"
+        },
+        "y": 1
+      }
+    },
+    "if2": {
+      "process_id": "if",
+      "arguments": {
+        "accept": {
+          "from_node": "loaddiskdata1"
+        },
+        "reject": {
+          "from_node": "if1"
+        },
+        "value": {
+          "from_node": "eq2"
+        }
+      }
+    },
+    "filterspatial1": {
+      "process_id": "filter_spatial",
+      "arguments": {
+        "data": {
+          "from_node": "if2"
+        },
+        "geometries": {
+          "from_parameter": "geometry"
+        }
+      }
+    },
+    "resamplespatial1": {
+      "process_id": "resample_spatial",
+      "arguments": {
+        "data": {
+          "from_node": "filterspatial1"
+        },
+        "method": "near",
+        "projection": {
+          "from_parameter": "target_epsg"
+        },
+        "resolution": {
+          "from_parameter": "target_res"
+        }
+      },
+      "result": true
+    }
+  },
+  "id": "udp_inference_module_alpha0",
+  "summary": "Loads the prepared 2021 habitat map for SK in EUNIS2012 topology for requested topology level. Returns a single band RasterCube.",
+  "description": "Loads the preprocessed habitat map for SK for the alpha0 release.",
+  "parameters": [
+    {
+      "name": "geometry",
+      "description": "Geometry as GeoJSON feature(s).",
+      "schema": {
+        "type": "object",
+        "subtype": "geojson"
+      }
+    },
+    {
+      "name": "year",
+      "description": "The year for which to generate the habitat map. (default: 2021)",
+      "schema": {
+        "type": "integer"
+      },
+      "default": 2021,
+      "optional": true
+    },
+    {
+      "name": "topology",
+      "description": "The topology to run the habitat mapping for. (default: EUNIS2012)",
+      "schema": {
+        "type": "string"
+      },
+      "default": "EUNIS2012",
+      "optional": true
+    },
+    {
+      "name": "topology_level",
+      "description": "The topology level to run the habitat mapping for. (default: 1)",
+      "schema": {
+        "type": "integer"
+      },
+      "default": 1,
+      "optional": true
+    },
+    {
+      "name": "reference_data",
+      "description": "Geometry of reference data as GeoJSON feature(s).",
+      "schema": {
+        "type": "object",
+        "subtype": "geojson"
+      }
+    },
+    {
+      "name": "remapping_dict",
+      "description": "List of str handing over all needed ecosystem characteristics layers to run model training.",
+      "schema": {
+        "type": "list"
+      },
+      "default": [
+        "cgls_dem_30",
+        "temp",
+        "watercontent"
+      ],
+      "optional": true
+    },
+    {
+      "name": "ml_model_type",
+      "description": "The name of the ML model type to use for the inference. (default: CatBoost)",
+      "schema": {
+        "type": "string"
+      },
+      "default": "CatBoost",
+      "optional": true
+    },
+    {
+      "name": "target_epsg",
+      "description": "The desired output projection system, which is EPSG:3035 by default.",
+      "schema": {
+        "type": "integer"
+      },
+      "default": 3035,
+      "optional": true
+    },
+    {
+      "name": "target_res",
+      "description": "The desired resolution, specified in units of the projection system, which is meters by default.",
+      "schema": {
+        "type": "number"
+      },
+      "default": 10.0,
+      "optional": true
+    }
+  ]
+}
