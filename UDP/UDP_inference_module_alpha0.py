@@ -6,7 +6,7 @@ This version for the alpha0 release is still a dummy and only loads a pre-proces
 import json
 import openeo
 from openeo.api.process import Parameter
-from openeo.processes import if_, eq
+from openeo.processes import if_, eq, text_concat, add
 from openeo.rest.udp import build_process_dict
 import os
 import pathlib
@@ -59,18 +59,27 @@ param_resolution = Parameter.number(
     description="The desired resolution, specified in units of the projection system, which is meters by default.",
 )
 
+# set the request year for the data
+start = text_concat([param_year, "01", "01"], separator="-")
+end = text_concat([add(param_year, 1), "01", "01"], separator="-")
+
+# specify the needed data locations
 cube_L1 = connection.load_disk_collection(format="GTiff",
-                                          glob_pattern="/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_L1.tif")
+                                          glob_pattern="/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_*_L1.tif",
+                                          options=dict(date_regex='.*_(\d{4})(\d{2})(\d{2})_L1.tif'))
 cube_L2 = connection.load_disk_collection(format="GTiff",
-                                          glob_pattern="/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_L2.tif")
+                                          glob_pattern="/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_*_L2.tif",
+                                          options=dict(date_regex='.*_(\d{4})(\d{2})(\d{2})_L2.tif'))
 cube_L3 = connection.load_disk_collection(format="GTiff",
-                                          glob_pattern="/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_L3.tif")
+                                          glob_pattern="/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_*_L3.tif",
+                                          options=dict(date_regex='.*_(\d{4})(\d{2})(\d{2})_L3.tif'))
 
 # filter thematic
 cube = if_(eq(param_topology_level, 1), cube_L1, if_(eq(param_topology_level, 2), cube_L2, cube_L3))
 
-# filter spatial
+# filter spatial and temporal
 cube = cube.filter_spatial(geometries=param_geo)
+cube = cube.filter_temporal([start, end])
 
 # warp to specified projection and resolution if needed
 cube = cube.resample_spatial(resolution=param_resolution, projection=param_epsg, method="near")

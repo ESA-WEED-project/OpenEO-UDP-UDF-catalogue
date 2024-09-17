@@ -4,24 +4,30 @@
       "process_id": "load_disk_data",
       "arguments": {
         "format": "GTiff",
-        "glob_pattern": "/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_L1.tif",
-        "options": {}
+        "glob_pattern": "/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_*_L1.tif",
+        "options": {
+          "date_regex": ".*_(\\d{4})(\\d{2})(\\d{2})_L1.tif"
+        }
       }
     },
     "loaddiskdata2": {
       "process_id": "load_disk_data",
       "arguments": {
         "format": "GTiff",
-        "glob_pattern": "/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_L2.tif",
-        "options": {}
+        "glob_pattern": "/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_*_L2.tif",
+        "options": {
+          "date_regex": ".*_(\\d{4})(\\d{2})(\\d{2})_L2.tif"
+        }
       }
     },
     "loaddiskdata3": {
       "process_id": "load_disk_data",
       "arguments": {
         "format": "GTiff",
-        "glob_pattern": "/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_L3.tif",
-        "options": {}
+        "glob_pattern": "/data/users/Public/buchhornm/prepared_SK_alpha0_habitat-maps/Slovakia_v5_*_L3.tif",
+        "options": {
+          "date_regex": ".*_(\\d{4})(\\d{2})(\\d{2})_L3.tif"
+        }
       }
     },
     "eq1": {
@@ -81,11 +87,62 @@
         }
       }
     },
+    "textconcat1": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          {
+            "from_parameter": "year"
+          },
+          "01",
+          "01"
+        ],
+        "separator": "-"
+      }
+    },
+    "add1": {
+      "process_id": "add",
+      "arguments": {
+        "x": {
+          "from_parameter": "year"
+        },
+        "y": 1
+      }
+    },
+    "textconcat2": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          {
+            "from_node": "add1"
+          },
+          "01",
+          "01"
+        ],
+        "separator": "-"
+      }
+    },
+    "filtertemporal1": {
+      "process_id": "filter_temporal",
+      "arguments": {
+        "data": {
+          "from_node": "filterspatial1"
+        },
+        "extent": [
+          {
+            "from_node": "textconcat1"
+          },
+          {
+            "from_node": "textconcat2"
+          }
+        ]
+      }
+    },
     "resamplespatial1": {
       "process_id": "resample_spatial",
       "arguments": {
         "data": {
-          "from_node": "filterspatial1"
+          "from_node": "filtertemporal1"
         },
         "method": "near",
         "projection": {
