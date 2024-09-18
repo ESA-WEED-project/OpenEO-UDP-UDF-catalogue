@@ -4,6 +4,17 @@
       "process_id": "text_concat",
       "arguments": {
         "data": [
+          "L",
+          {
+            "from_parameter": "topology_level"
+          }
+        ]
+      }
+    },
+    "textconcat2": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
           {
             "from_parameter": "year"
           },
@@ -22,7 +33,7 @@
         "y": 1
       }
     },
-    "textconcat2": {
+    "textconcat3": {
       "process_id": "text_concat",
       "arguments": {
         "data": [
@@ -38,15 +49,20 @@
     "loadstac1": {
       "process_id": "load_stac",
       "arguments": {
+        "bands": [
+          {
+            "from_node": "textconcat1"
+          }
+        ],
         "spatial_extent": {
           "from_parameter": "geometry"
         },
         "temporal_extent": [
           {
-            "from_node": "textconcat1"
+            "from_node": "textconcat2"
           },
           {
-            "from_node": "textconcat2"
+            "from_node": "textconcat3"
           }
         ],
         "url": "https://stac.openeo.vito.be/collections/habitat-maps"

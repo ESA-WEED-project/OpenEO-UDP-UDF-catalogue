@@ -65,8 +65,10 @@ end = text_concat([add(param_year, 1), "01", "01"], separator="-")
 
 # specify the needed data locations
 cube = connection.load_stac('https://stac.openeo.vito.be/collections/habitat-maps',
-                               spatial_extent = param_geo,
-                               temporal_extent = [start, end])
+                            spatial_extent = param_geo,
+                            temporal_extent = [start, end],
+                            bands=[text_concat(["L", param_topology_level])]
+                            )
 
 
 # warp to specified projection and resolution if needed
