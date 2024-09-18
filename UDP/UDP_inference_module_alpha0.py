@@ -64,22 +64,10 @@ start = text_concat([param_year, "01", "01"], separator="-")
 end = text_concat([add(param_year, 1), "01", "01"], separator="-")
 
 # specify the needed data locations
-cube_L1 = connection.load_disk_collection(format="GTiff",
-                                          glob_pattern="/data/open/prepared_SK_alpha0_habitat-maps/Slovakia_v5_*_L1.tif",
-                                          options=dict(date_regex='.*_(\d{4})(\d{2})(\d{2})_L1.tif'))
-cube_L2 = connection.load_disk_collection(format="GTiff",
-                                          glob_pattern="/data/open/prepared_SK_alpha0_habitat-maps/Slovakia_v5_*_L2.tif",
-                                          options=dict(date_regex='.*_(\d{4})(\d{2})(\d{2})_L2.tif'))
-cube_L3 = connection.load_disk_collection(format="GTiff",
-                                          glob_pattern="/data/open/prepared_SK_alpha0_habitat-maps/Slovakia_v5_*_L3.tif",
-                                          options=dict(date_regex='.*_(\d{4})(\d{2})(\d{2})_L3.tif'))
+cube = connection.load_stac('https://stac.openeo.vito.be/collections/habitat-maps',
+                               spatial_extent = param_geo,
+                               temporal_extent = [start, end])
 
-# filter thematic
-cube = if_(eq(param_topology_level, 1), cube_L1, if_(eq(param_topology_level, 2), cube_L2, cube_L3))
-
-# filter spatial and temporal
-cube = cube.filter_spatial(geometries=param_geo)
-cube = cube.filter_temporal([start, end])
 
 # warp to specified projection and resolution if needed
 cube = cube.resample_spatial(resolution=param_resolution, projection=param_epsg, method="near")

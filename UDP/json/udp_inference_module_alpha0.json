@@ -1,92 +1,5 @@
 {
   "process_graph": {
-    "loaddiskdata1": {
-      "process_id": "load_disk_data",
-      "arguments": {
-        "format": "GTiff",
-        "glob_pattern": "/data/open/prepared_SK_alpha0_habitat-maps/Slovakia_v5_*_L1.tif",
-        "options": {
-          "date_regex": ".*_(\\d{4})(\\d{2})(\\d{2})_L1.tif"
-        }
-      }
-    },
-    "loaddiskdata2": {
-      "process_id": "load_disk_data",
-      "arguments": {
-        "format": "GTiff",
-        "glob_pattern": "/data/open/prepared_SK_alpha0_habitat-maps/Slovakia_v5_*_L2.tif",
-        "options": {
-          "date_regex": ".*_(\\d{4})(\\d{2})(\\d{2})_L2.tif"
-        }
-      }
-    },
-    "loaddiskdata3": {
-      "process_id": "load_disk_data",
-      "arguments": {
-        "format": "GTiff",
-        "glob_pattern": "/data/open/prepared_SK_alpha0_habitat-maps/Slovakia_v5_*_L3.tif",
-        "options": {
-          "date_regex": ".*_(\\d{4})(\\d{2})(\\d{2})_L3.tif"
-        }
-      }
-    },
-    "eq1": {
-      "process_id": "eq",
-      "arguments": {
-        "x": {
-          "from_parameter": "topology_level"
-        },
-        "y": 2
-      }
-    },
-    "if1": {
-      "process_id": "if",
-      "arguments": {
-        "accept": {
-          "from_node": "loaddiskdata2"
-        },
-        "reject": {
-          "from_node": "loaddiskdata3"
-        },
-        "value": {
-          "from_node": "eq1"
-        }
-      }
-    },
-    "eq2": {
-      "process_id": "eq",
-      "arguments": {
-        "x": {
-          "from_parameter": "topology_level"
-        },
-        "y": 1
-      }
-    },
-    "if2": {
-      "process_id": "if",
-      "arguments": {
-        "accept": {
-          "from_node": "loaddiskdata1"
-        },
-        "reject": {
-          "from_node": "if1"
-        },
-        "value": {
-          "from_node": "eq2"
-        }
-      }
-    },
-    "filterspatial1": {
-      "process_id": "filter_spatial",
-      "arguments": {
-        "data": {
-          "from_node": "if2"
-        },
-        "geometries": {
-          "from_parameter": "geometry"
-        }
-      }
-    },
     "textconcat1": {
       "process_id": "text_concat",
       "arguments": {
@@ -122,27 +35,29 @@
         "separator": "-"
       }
     },
-    "filtertemporal1": {
-      "process_id": "filter_temporal",
+    "loadstac1": {
+      "process_id": "load_stac",
       "arguments": {
-        "data": {
-          "from_node": "filterspatial1"
+        "spatial_extent": {
+          "from_parameter": "geometry"
         },
-        "extent": [
+        "temporal_extent": [
           {
             "from_node": "textconcat1"
           },
           {
             "from_node": "textconcat2"
           }
-        ]
+        ],
+        "url": "https://stac.openeo.vito.be/collections/habitat-maps"
       }
     },
     "resamplespatial1": {
       "process_id": "resample_spatial",
       "arguments": {
+        "align": "upper-left",
         "data": {
-          "from_node": "filtertemporal1"
+          "from_node": "loadstac1"
         },
         "method": "near",
         "projection": {
