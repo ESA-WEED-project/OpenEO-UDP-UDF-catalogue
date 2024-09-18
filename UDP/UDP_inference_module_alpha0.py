@@ -38,7 +38,7 @@ param_td = Parameter.geojson(
     description="Geometry of reference data as GeoJSON feature(s).",
 )
 param_feature_ids = Parameter(
-    name="remapping_dict",
+    name="feature_list",
     default=['cgls_dem_30', 'temp', 'watercontent'],
     description="List of str handing over all needed ecosystem characteristics layers to run model training.",
     schema={"type": "list"},
