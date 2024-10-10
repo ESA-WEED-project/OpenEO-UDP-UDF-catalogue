@@ -131,7 +131,15 @@
       "schema": {
         "type": "object",
         "subtype": "geojson"
-      }
+      },
+      "default": {
+        "type": "Point",
+        "coordinates": [
+          20.5846,
+          48.8846
+        ]
+      },
+      "optional": true
     },
     {
       "name": "feature_list",

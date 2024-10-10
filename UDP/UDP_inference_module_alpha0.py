@@ -6,7 +6,7 @@ This version for the alpha0 release is still a dummy and only loads a pre-proces
 import json
 import openeo
 from openeo.api.process import Parameter
-from openeo.processes import if_, eq, text_concat, add
+from openeo.processes import text_concat, add
 from openeo.rest.udp import build_process_dict
 import os
 import pathlib
@@ -35,6 +35,7 @@ param_topology_level = Parameter.integer(
 )
 param_td = Parameter.geojson(
     name="reference_data",
+    default={"type":"Point","coordinates":[20.5846,48.8846]},
     description="Geometry of reference data as GeoJSON feature(s).",
 )
 param_feature_ids = Parameter(
