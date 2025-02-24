@@ -2471,5 +2471,11 @@
       "default": 10.0,
       "optional": true
     }
-  ]
+  ],
+  "default_job_options": {
+    "driver-memory": "4g",
+    "executor-memory": "2g",
+    "executor-memoryOverhead": "1g",
+    "python-memory": "3g",
+    "soft-errors": "true"}
 }
