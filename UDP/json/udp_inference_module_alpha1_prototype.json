@@ -2479,7 +2479,7 @@
     "python-memory": "3g",
     "soft-errors": "true",
     "udf-dependency-archives": [
-      "https://artifactory.vgt.vito.be/artifactory/auxdata-public/openeo/onnx_dependencies_1.16.3.zip#onnx_deps"
+      "https://artifactory.vgt.vito.be/artifactory/auxdata-public/openeo/onnx_dependencies_1.16.3.zip#udf-py-deps"
     ]
     }
 }
