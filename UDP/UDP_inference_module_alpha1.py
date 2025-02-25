@@ -1,6 +1,35 @@
 """
 UDP to run the inference module on openEO with given DataCube and ML model
-This version for the alpha0 release is still a dummy and only loads a pre-processed map.
+This version for the alpha1 release. There are a few limitation
+1) processing options should be added manually in the outcome json
+
+  "default_job_options": {
+    "driver-memory": "1000m",
+    "driver-memoryOverhead": "1000m",
+    "executor-memory": "1500m",
+    "executor-memoryOverhead": "1500m",
+    "python-memory": "4000m",
+    "max-executors": 20,
+    "soft-errors": "true",
+    "udf-dependency-archives": [
+      "https://s3.waw3-1.cloudferro.com/swift/v1/project_dependencies/onnx_dependencies_1.16.3.zip#onnx_deps"
+    ]}
+
+2) it seems that the param object is not yet suitable to rename band name on. So for the moment not set should be retrieved from models later on.
+3) The text_concat on the filename prefix is not seriazable somehow, so needs to be adapted manually in the json.
+        add module in json
+    "textconcat4": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          "Alpha1_EUNIS-habitat-proba-cube_year",
+          {"from_parameter": "year"},
+          "_",
+          {"from_parameter": "area_name"}]
+      }
+    },
+and replace file_name with textconcat4
+
 
 """
 import json
