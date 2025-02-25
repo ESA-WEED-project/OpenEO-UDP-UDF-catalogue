@@ -2467,6 +2467,6 @@
     "max-executors": 20,
     "soft-errors": "true",
     "udf-dependency-archives": [
-      "https://artifactory.vgt.vito.be/artifactory/auxdata-public/openeo/onnx_dependencies_1.16.3.zip#onnx_deps"
+      "https://s3.waw3-1.cloudferro.com/swift/v1/project_dependencies/onnx_dependencies_1.16.3.zip#onnx_deps"
     ]}
 }
