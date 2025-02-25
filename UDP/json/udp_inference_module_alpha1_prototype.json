@@ -2300,15 +2300,9 @@
       "arguments": {
         "data": [
           "Alpha1_EUNIS-habitat-proba-cube_year",
-          {
-            "from_parameter": "year"
-          },
+          {"from_parameter": "year"},
           "_",
-          {
-            "from_parameter": "area_name"
-          }
-
-        ]
+          {"from_parameter": "area_name"}]
       }
     },
     "saveresult1": {
