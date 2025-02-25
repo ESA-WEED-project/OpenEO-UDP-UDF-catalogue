@@ -2295,7 +2295,7 @@
         }
       }
     },
-     "textconcat4: {
+    "textconcat4": {
       "process_id": "text_concat",
       "arguments": {
         "data": [
