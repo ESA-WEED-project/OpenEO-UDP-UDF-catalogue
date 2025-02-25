@@ -2295,7 +2295,7 @@
         }
       }
     },
-     "textconcat4": {
+     "textconcat4: {
       "process_id": "text_concat",
       "arguments": {
         "data": [
@@ -2322,6 +2322,20 @@
           "separate_asset_per_band": true,
           "filename_prefix": {"from_node": "textconcat4"}
         }
+      }
+    },
+    "textconcat3": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          {
+            "from_parameter": "digitalId"
+          },
+          {
+            "from_parameter": "scenarioId"
+          }
+        ],
+        "separator": "/"
       }
     },
     "exportworkspace1": {
