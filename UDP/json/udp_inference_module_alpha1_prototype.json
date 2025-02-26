@@ -2270,11 +2270,23 @@
         }
       }
     },
+    "renamelabels5": {
+      "process_id": "rename_labels",
+      "arguments": {
+        "data": {
+          "from_node": "applydimension6"
+        },
+        "dimension": "bands",
+        "target": {
+                    "from_parameter": "output_band_names"
+                  }
+      }
+    },
     "apply4": {
       "process_id": "apply",
       "arguments": {
         "data": {
-          "from_node": "applydimension6"
+          "from_node": "renamelabels5"
         },
         "process": {
           "process_graph": {
@@ -2349,6 +2361,20 @@
   "id": "udp_inference_module_alpha1",
   "summary": "Generates the alpha 1 inference result based on inputs.Returns a single band per probability.",
   "description": "Inference for the habitat maps for the alpha1 release.",
+  "default_job_options": {
+    "driver-memory": "1000m",
+    "driver-memoryOverhead": "1000m",
+    "driver-cores": "2",
+    "executor-memory": "1500m",
+    "executor-memoryOverhead": "1500m",
+    "executor-cores": "2",
+    "max-executors": 20,
+    "soft-errors": "true",
+    "python-memory": "4000m",
+    "udf-dependency-archives": [
+      "https://s3.waw3-1.cloudferro.com/swift/v1/project_dependencies/onnx_dependencies_1.16.3.zip#onnx_deps"
+    ]
+  },
   "parameters": [
     {
       "name": "bbox",
@@ -2465,16 +2491,5 @@
       "default": 10.0,
       "optional": true
     }
-  ],
-  "default_job_options": {
-    "driver-memory": "1000m",
-    "driver-memoryOverhead": "1000m",
-    "executor-memory": "1500m",
-    "executor-memoryOverhead": "1500m",
-    "python-memory": "4000m",
-    "max-executors": 20,
-    "soft-errors": "true",
-    "udf-dependency-archives": [
-      "https://s3.waw3-1.cloudferro.com/swift/v1/project_dependencies/onnx_dependencies_1.16.3.zip#onnx_deps"
-    ]}
+  ]
 }

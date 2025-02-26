@@ -1,22 +1,12 @@
 """
 UDP to run the inference module on openEO with given DataCube and ML model
 This version for the alpha1 release. There are a few limitation
-1) processing options should be added manually in the outcome json
-
-  "default_job_options": {
-    "driver-memory": "1000m",
-    "driver-memoryOverhead": "1000m",
-    "executor-memory": "1500m",
-    "executor-memoryOverhead": "1500m",
-    "python-memory": "4000m",
-    "max-executors": 20,
-    "soft-errors": "true",
-    "udf-dependency-archives": [
-      "https://s3.waw3-1.cloudferro.com/swift/v1/project_dependencies/onnx_dependencies_1.16.3.zip#onnx_deps"
-    ]}
-
-2) it seems that the param object is not yet suitable to rename band name on. So for the moment not set should be retrieved from models later on.
-3) The text_concat on the filename prefix is not seriazable somehow, so needs to be adapted manually in the json.
+1) it seems that the param object is not yet suitable to rename band name on. So for the moment not set should be retrieved from models later on.
+    replace "output_band_names_replace" with
+    {
+                    "from_parameter": "output_band_names"
+                  }
+2) The text_concat on the filename prefix is not seriazable somehow, so needs to be adapted manually in the json.
         add module in json
     "textconcat4": {
       "process_id": "text_concat",
@@ -37,7 +27,6 @@ import openeo
 from openeo.api.process import Parameter
 from openeo.processes import text_concat, add
 from openeo.rest.udp import build_process_dict
-from openeo.rest.datacube import THIS
 from eo_processing.config.settings import get_collection_options, get_standard_processing_options, get_job_options
 from eo_processing.openeo.processing import generate_master_feature_cube
 from eo_processing.utils.helper import getUDFpath
@@ -209,7 +198,7 @@ udf  = openeo.UDF.from_file(
 proba_cube = data_cube.apply_dimension(process=udf, dimension = "bands")
 
 # extra posprocessing (band label renaming and scaling)
-#proba_cube = proba_cube.rename_labels(dimension="bands",target=param_output_band_names) This does not seem to work
+proba_cube = proba_cube.rename_labels(dimension="bands",target=['param_output_band_names_replace']) #This does not seem to work
 proba_cube = proba_cube.linear_scale_range(0,100, 0,100)
 
 #### create job progress graph including storage to S3
@@ -221,12 +210,8 @@ saved_cube = proba_cube.save_result(format="GTiff",
 
 #generate S3_prefix
 
-cube_workspace = saved_cube.process("export_workspace",
-                                        arguments={
-                                            'data': THIS,
-                                            'workspace': 'esa-weed-workspace',
-                                            'merge': s3_prefix
-                                        })
+cube_workspace = saved_cube.export_workspace(workspace= 'esa-weed-workspace',
+                                            merge = s3_prefix)
 
 
 description = """
@@ -248,8 +233,8 @@ spec = build_process_dict(
         param_epsg,
         param_resolution,
     ],
-
     process_graph=cube_workspace,
+    default_job_options=job_options
 )
 
 # dump to json file to be usable as UDP
