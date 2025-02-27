@@ -167,9 +167,7 @@ data_cube = data_cube.merge_cubes(DEM)
 
 # load the WERN features from public STAC
 WENR = connection.load_stac("https://stac.openeo.vito.be/collections/wenr_features")
-# drop the time dimension
 
-WENR.metadata=None
 # resample the cube to 10m and EPSG of corresponding 20x20km grid tile
 WENR = WENR.resample_spatial(projection=processing_options['target_crs'],
                              resolution=(processing_options['resolution']),

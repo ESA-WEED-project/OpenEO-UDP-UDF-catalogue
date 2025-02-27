@@ -2364,8 +2364,10 @@
   "default_job_options": {
     "driver-memory": "1000m",
     "driver-memoryOverhead": "1000m",
+    "driver-cores": "1",
     "executor-memory": "1500m",
     "executor-memoryOverhead": "1500m",
+    "executor-cores": "1",
     "max-executors": 20,
     "soft-errors": "true",
     "python-memory": "4000m",
