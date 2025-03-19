@@ -2325,7 +2325,7 @@
         },
         "format": "GTiff",
         "options": {
-          "separate_asset_per_band": true,
+          "separate_asset_per_band": false,
           "filename_prefix": {"from_node": "textconcat4"}
         }
       }
