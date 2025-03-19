@@ -202,7 +202,7 @@ proba_cube = proba_cube.linear_scale_range(0,100, 0,100)
 #### create job progress graph including storage to S3
 saved_cube = proba_cube.save_result(format="GTiff",
                                     options={
-                                        'separate_asset_per_band': True,
+                                        'separate_asset_per_band': False,
                                         'filename_prefix': "file_name",
                                     })
 
