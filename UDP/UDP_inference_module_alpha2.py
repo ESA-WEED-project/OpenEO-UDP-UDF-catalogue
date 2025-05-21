@@ -117,7 +117,7 @@ param_name = Parameter.string(
 
 # set the request year for the data
 start = text_concat([param_year, "01", "01T00:00:00Z" ], separator="-")
-end = text_concat([param_year, "12", "31T00:00:00Z"], separator="-")
+end = text_concat([param_year, "12", "31T23:59:59Z"], separator="-")
 
 
 file_namea = text_concat(["Alpha2_EUNIS-habitat-proba-cube_year",param_year ],separator="")
