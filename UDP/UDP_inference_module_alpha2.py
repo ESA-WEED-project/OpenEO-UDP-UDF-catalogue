@@ -140,7 +140,7 @@ job_options.update({'etl_organization_id': '4938'})  # billing to specific organ
 job_options.update({"driver-memory": "4G",
                     "driver-memoryOverhead": "4G",
                     "executor-memory": "2G",
-                    "executor-memoryOverhead": "1000m",
+                    "executor-memoryOverhead": "2500m",
                     "python-memory": "5G",
                     "logging-threshold": "debug"})
 #### end of delete
