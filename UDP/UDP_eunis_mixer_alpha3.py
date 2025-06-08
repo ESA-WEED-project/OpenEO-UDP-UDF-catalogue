@@ -25,6 +25,7 @@ and replace file_name with {"from_node": "textconcat4"} in saveresult1 and as we
 
 """
 import os
+import sys
 import pathlib
 import openeo
 import json
@@ -39,6 +40,8 @@ from openeo.metadata import metadata_from_stac
 from openeo.api.process import Parameter
 from openeo.processes import text_concat
 from openeo.rest.udp import build_process_dict
+# TODO remove direct path
+sys.path.append('/home/smetsb/PycharmProjects/eo_processing/src')
 from eo_processing.config import get_job_options, get_collection_options, get_standard_processing_options
 from eo_processing.utils.helper import init_connection, getUDFpath
 from eo_processing.utils.metadata import get_base_metadata
@@ -186,6 +189,7 @@ def parse_prob_classes_fromStac(metadata):
 
     return df, tile
 
+###################################
 # set the request year for the data
 start = text_concat([param_year, "01", "01T00:00:00Z" ], separator="-")
 end = text_concat([param_year, "12", "31T23:59:59Z"], separator="-")
@@ -270,15 +274,15 @@ saved_cube = data_cube.save_result(format="GTiff",
                                    })
 
 # save to S3 and directly publish results in STAC catalog on WEED STAC.api if export workspace is configured
-cube_workspace = saved_cube.export_workspace('workspace'="esa-weed-apex-stac-api-workspace",
-                                    'merge'=s3_prefix)
+cube_workspace = saved_cube.export_workspace(workspace="esa-weed-apex-stac-api-workspace",
+                                    merge=s3_prefix)
 
 description = """
 EUNIS hierarchical mixer for the habitat maps for the alpha3 release.
 """
 spec = build_process_dict(
-    process_id="udp_inference_module_alpha3",
-    summary="Generates the alpha 3 inference result based on inputs.",
+    process_id="udp_eunis_mixer_alpha3",
+    summary="Generates the alpha 3 eunix extent map result based on highest probabilities.",
     description=description.strip(),
     parameters=[
         param_bbox,
