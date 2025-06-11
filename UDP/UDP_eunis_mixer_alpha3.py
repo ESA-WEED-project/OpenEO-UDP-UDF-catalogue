@@ -45,7 +45,6 @@ sys.path.append('/home/smetsb/PycharmProjects/eo_processing/src')
 from eo_processing.config import get_job_options, get_collection_options, get_standard_processing_options
 from eo_processing.utils.helper import init_connection, getUDFpath
 from eo_processing.utils.metadata import get_base_metadata
-from eo_processing.utils.geoprocessing import reproj_bbox_to_ll
 
 # Establish connection to OpenEO instance (note that authentication is not necessary to just build the UDP)
 provider = 'cdse' #this udp works only on cdse
@@ -157,38 +156,6 @@ def query_stac(spatial_extent, temporal_extent, collections=["inference-alpha2-p
         print(f"Unexpected status {r.status_code}:")
         raise RuntimeError(r.text)
 
-def parse_prob_classes_fromStac(metadata):
-
-    #print("Parsing prob classes from Stac")
-    filename = metadata['features'][0]['id']  # 'alpha-2_proba-cube_year2024_34σEH13_EUNIS2021plus-EU-v1-2024-MED_v101.tif'
-
-    filename_match = re.search((r"year(?P<year>\d{4})_"r"(?P<tileID>[^_]+).*"r"_v(?P<version>\d+)\.tif$"), filename)
-    if filename_match:
-        version = filename_match.group("version")
-        year = filename_match.group("year")
-        tile = filename_match.group("tileID")
-    else:
-        raise ValueError("Filename does not match expected pattern.")
-
-    #now retrieve the bandnames to extract class information
-    band_names=[]
-    for i in range(len(metadata['features'][0]['assets'][filename]['eo:bands'])):
-        band_names.append(metadata['features'][0]['assets'][filename]['eo:bands'][i]['name'])
-    # Parse band names into structured format
-    band_info = []
-    pattern = re.compile(r"Level([\w\d]+)_class-([\w\d]+)_habitat-([\w\d]+)-(\d+)")
-    for band_nr, band_name in enumerate(band_names, start=1):
-        match = pattern.search(band_name.replace(" ",""))  #make sure no white spaces pending
-        if match:
-            level, class_name, habitat, raster_code = match.groups()
-            band_info.append((band_nr, level, class_name, habitat, int(raster_code)))
-        else:
-            print('skipping {}'.format(band_name))
-    # Create DataFrame
-    df = pd.DataFrame(band_info, columns=["band_nr", "level", "model", "habitat", "raster_code"])
-
-    return df, tile
-
 ###################################
 # set the request year for the data
 start = text_concat([param_year, "01", "01T00:00:00Z" ], separator="-")
@@ -221,26 +188,30 @@ job_options.update({"driver-memory": "4G",
 
 # first check if there is an item that matches the criteria
 # bbox is array of numbers in sequesce lon_min, lat_min, lon_max, lat_max in WGS84
+#In my opinion this check should be done on client side
+'''
 extent_ll = reproj_bbox_to_ll(processing_extent).bounds
 s_extent = [extent_ll[0], extent_ll[1], extent_ll[2], extent_ll[3]]
 s_extent_dict = {"west": extent_ll[0], "south": extent_ll[1], "east": extent_ll[2], "north": extent_ll[3],
                  "crs": "EPSG:4326"}
-t_extent = (start, (datetime.strptime(end, '%Y-%m-%d') - timedelta(days=1)).strftime('%Y-%m-%d'))
-
+'''
+#t_extent = (start, (datetime.strptime(end, '%Y-%m-%d') - timedelta(days=1)).strftime('%Y-%m-%d'))
+t_extent = (start, end)
 # s_extent= {"west":21.229899387831, "south":38.48744551412938, "east": 21.458646069348923, "north":38.668357705483636, "crs": "EPSG:4326"}
 collections = ["inference-alpha2-prepared-v101"]
+'''
 result_query = query_stac(s_extent, t_extent, collections)
 if result_query is None:
     raise RuntimeError("No STAC items found that match the criteria in WEED catalog {collections}")
 
 # use returned metadata to build up the class dictionary
 df, tileID = parse_prob_classes_fromStac(result_query)
+'''
 
-print('Load datacube from stac for tile {}'.format(tileID))
 # create a connection to backend
 #connection = init_connection(backend)
 data_cube = connection.load_stac("https://catalogue.weed.apex.esa.int/collections/inference-alpha2-prepared-v101",
-                                 spatial_extent=s_extent_dict)
+                                 spatial_extent=processing_extent)
                                 # temporal_extent TODO add once openeo has fixed issue
 # keep temporal dimension to store in STAC
 # we do not yet resample as we follow the inference spatial resolution
@@ -249,8 +220,7 @@ data_cube = data_cube.filter_bbox(processing_extent)
 
 ### run hierarchical probability merger
 udf = openeo.UDF.from_file(
-    getUDFpath('udf_max_occurence_hierarchical_merger.py'),
-    context={"tile": tileID, "level_info": df.to_dict()})
+    getUDFpath('udf_max_occurence_hierarchical_merger.py'))
 
 # Apply the UDF to the data cube
 data_cube = data_cube.apply_dimension(process=udf, dimension="bands")
@@ -260,16 +230,15 @@ data_cube = data_cube.apply_dimension(process=udf, dimension="bands")
 file_meta = get_base_metadata(project='WEED')
 file_meta.update(description=f'EUNIS habitat map level3 (highest probability of occurrence).',
                  tiling_grid='Global_20km',
-                 product_tile=f'{tileID}',
-                 raster_coding=str(df.set_index('habitat')['raster_code'].to_dict()),
-                 time_start=start,
-                 time_end=end)
+                 product_tile= 'from_param_name', #raster_coding=str(df.set_index('habitat')['raster_code'].to_dict()),
+                 time_start='from_start',
+                 time_end='from_end')
 # ToDo: prepare also needed band metadata
 
 saved_cube = data_cube.save_result(format="GTiff",
                                    options={
                                        'separate_asset_per_band': False,
-                                       'filename_prefix': file_name,
+                                       'filename_prefix': "file_name",
                                        'file_metadata': file_meta
                                    })
 
