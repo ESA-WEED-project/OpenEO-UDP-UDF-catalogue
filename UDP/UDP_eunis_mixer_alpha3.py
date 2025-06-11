@@ -3,24 +3,48 @@ UDP to run the inference module on openEO with given DataCube and ML model
 This version for the alpha2 release. There are a few limitation
 1) The text_concat on the filename prefix is not seriazable somehow in the save_results node, so needs to be adapted manually in the json.
         add module in json
+    "textconcat2": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          {
+            "from_parameter": "year"
+          },
+          "01",
+          "01T00:00:00Z"
+        ],
+        "separator": "-"
+      }
+    },
+    "textconcat3": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          {
+            "from_parameter": "year"
+          },
+          "12",
+          "31T23:59:59Z"
+        ],
+        "separator": "-"
+      }
+    },
         "textconcat4": {
       "process_id": "text_concat",
       "arguments": {
         "data": [
-          "Alpha2_EUNIS-habitat-proba-cube_year",
+          "Alpha3_EUNIS-extent-map_year",
           {"from_parameter": "year"},
           "_",
           {"from_parameter": "area_name"},
-          "_",
-          {"from_parameter": "onnx_model_id"},
           "_",
           {"from_parameter": "scenarioId"}]
       }
     },
 and replace file_name with {"from_node": "textconcat4"} in saveresult1 and as well
             "product_tile": {"from_parameter": "area_name"},
-            "time_start": {"from_node": "textconcat1"},
-            "time_end": {"from_node": "textconcat2"}
+            "time_start": {"from_node": "textconcat2"},
+            "time_end": {"from_node": "textconcat3"}
 
 
 """
@@ -165,6 +189,7 @@ end = text_concat([param_year, "12", "31T23:59:59Z"], separator="-")
 file_namea = text_concat(["Alpha3_EUNIS-extent-map_year",param_year ],separator="")
 file_name = text_concat([file_namea,param_name,param_scenarioId], separator="_")
 s3_prefix = text_concat([param_digitalId,param_scenarioId], separator="-")
+STAC_url = text_concat(["https://catalogue.weed.apex.esa.int/collections",s3_prefix],separator="/")
 
 # convert the row name into a openEO bbox dict giving the spatial extent of the job
 processing_extent = param_bbox

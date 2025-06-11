@@ -119,8 +119,6 @@
           "_",
           {"from_parameter": "area_name"},
           "_",
-          {"from_parameter": "onnx_model_id"},
-          "_",
           {"from_parameter": "scenarioId"}]
       }
     },
