@@ -128,7 +128,7 @@
       "process_id": "text_concat",
       "arguments": {
         "data": [
-          "https://catalogue.weed.apex.esa.int/collections/",
+          "https://catalogue.weed.apex.esa.int/collections",
           {"from_node": "textconcat1"}
         ],
         "separator": "/"
