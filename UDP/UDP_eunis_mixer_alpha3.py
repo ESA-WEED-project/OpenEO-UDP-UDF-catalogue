@@ -46,6 +46,18 @@ and replace file_name with {"from_node": "textconcat4"} in saveresult1 and as we
             "time_start": {"from_node": "textconcat2"},
             "time_end": {"from_node": "textconcat3"}
 
+create concat of STAC url
+"textconcat5": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          "https://catalogue.weed.apex.esa.int/collections/",
+          {"from_node": "textconcat"}
+        ],
+        "separator": "/"
+        }
+    }
+
 
 """
 import os

@@ -6,7 +6,9 @@
         "spatial_extent": {
           "from_parameter": "bbox"
         },
-        "url": "https://catalogue.weed.apex.esa.int/collections/inference-alpha2-prepared-v101"
+        "url": {
+          "from_node": "textconcat5"
+        }
       }
     },
     "filterbbox1": {
@@ -121,6 +123,16 @@
           "_",
           {"from_parameter": "scenarioId"}]
       }
+    },
+    "textconcat5": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          "https://catalogue.weed.apex.esa.int/collections/",
+          {"from_node": "textconcat1"}
+        ],
+        "separator": "/"
+        }
     },
     "exportworkspace1": {
       "process_id": "export_workspace",
