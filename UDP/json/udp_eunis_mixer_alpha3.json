@@ -134,6 +134,16 @@
         "separator": "/"
         }
     },
+    "textconcat6": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          {"from_node": "textconcat1"},
+          "postprocessed"
+        ],
+        "separator": "-"
+        }
+    },
     "exportworkspace1": {
       "process_id": "export_workspace",
       "arguments": {
@@ -141,7 +151,7 @@
           "from_node": "saveresult1"
         },
         "merge": {
-          "from_node": "textconcat1"
+          "from_node": "textconcat6"
         },
         "workspace": "esa-weed-apex-stac-api-workspace"
       },
