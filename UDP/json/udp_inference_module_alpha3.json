@@ -79,7 +79,9 @@
           "from_node": "loadcollection1"
         },
         "method": "near",
-        "projection": 3035,
+        "projection": {
+                    "from_parameter": "target_epsg"
+        },
         "resolution": 10.0
       }
     },
@@ -127,7 +129,9 @@
           "from_node": "loadcollection2"
         },
         "method": "near",
-        "projection": 3035,
+        "projection": {
+                    "from_parameter": "target_epsg"
+        },
         "resolution": 10.0
       }
     },
@@ -1055,7 +1059,9 @@
           "from_node": "sarbackscatter1"
         },
         "method": "near",
-        "projection": 3035,
+        "projection": {
+                    "from_parameter": "target_epsg"
+        },
         "resolution": 10.0
       }
     },
@@ -2192,7 +2198,9 @@
           "from_node": "reducedimension1"
         },
         "method": "bilinear",
-        "projection": 3035,
+        "projection": {
+                    "from_parameter": "target_epsg"
+        },
         "resolution": 10.0
       }
     },
@@ -2241,7 +2249,9 @@
           "from_node": "loadstac1"
         },
         "method": "near",
-        "projection": 3035,
+        "projection": {
+                    "from_parameter": "target_epsg"
+        },
         "resolution": 10.0
       }
     },
@@ -2310,7 +2320,7 @@
             "from_node": "textconcat2"
           }
         ],
-        "url": "https://catalogue.weed.apex.esa.int/collections/Globes-V1"
+        "url": "https://catalogue.weed.apex.esa.int/collections/Globes-V3"
       }
     },
     "resamplespatial6": {
@@ -2321,7 +2331,9 @@
           "from_node": "loadstac2"
         },
         "method": "near",
-        "projection": 3035,
+        "projection": {
+                    "from_parameter": "target_epsg"
+        },
         "resolution": 10.0
       }
     },
@@ -2590,6 +2602,15 @@
         "type": "string"
       },
       "default": 2024,
+      "optional": true
+    },
+    {
+      "name": "target_epsg",
+      "description": "The desired output projection system, which is EPSG:3035 by default.",
+      "schema": {
+        "type": "integer"
+      },
+      "default": 3035,
       "optional": true
     }
   ]

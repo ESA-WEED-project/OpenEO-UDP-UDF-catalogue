@@ -116,6 +116,12 @@ param_name = Parameter.string(
     optional = True,
     default = "AOI"
 )
+param_epsg = Parameter.integer(
+    name="target_epsg",
+    default=3035,
+    optional=True,
+    description="The desired output projection system, which is EPSG:3035 by default.",
+)
 
 # set the request year for the data
 start = text_concat([param_year, "01", "01T00:00:00Z" ], separator="-")
@@ -137,6 +143,8 @@ processing_options = get_standard_processing_options(provider=provider, task='fe
 job_options.update({"allow_empty_cubes": True})  # that cubes in areas with no data are created for a STAC and not an error
 job_options.update({"export-workspace-enable-merge": True})  # that items for STAC catalog are merged if in same S3 prefix
 job_options.update({'etl_organization_id': '4938'})  # billing to specific organization
+# adapt the epsg to the processing grid
+processing_options.update(target_crs = param_epsg)
 
 #### increasing memory for alpha-2 for testing
 job_options.update({"driver-memory": "4G",
@@ -189,9 +197,9 @@ except:
 data_cube = data_cube.merge_cubes(WENR)
 
 # load the GLOBES features from public STAC
-GLOBES = connection.load_stac("https://catalogue.weed.apex.esa.int/collections/Globes-V1",
+GLOBES = connection.load_stac("https://catalogue.weed.apex.esa.int/collections/Globes-V3",
                               bands=metadata_from_stac(
-                                  "https://catalogue.weed.apex.esa.int/collections/Globes-V1").band_names,
+                                  "https://catalogue.weed.apex.esa.int/collections/Globes-V3").band_names,
                               spatial_extent=processing_extent,
                               temporal_extent=[start, end])
 # resample the cube to 10m and EPSG of corresponding 20x20km grid tile
