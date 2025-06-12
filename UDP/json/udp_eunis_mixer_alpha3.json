@@ -1,0 +1,266 @@
+{
+  "process_graph": {
+    "loadstac1": {
+      "process_id": "load_stac",
+      "arguments": {
+        "spatial_extent": {
+          "from_parameter": "bbox"
+        },
+        "url": {
+          "from_node": "textconcat5"
+        }
+      }
+    },
+    "filterbbox1": {
+      "process_id": "filter_bbox",
+      "arguments": {
+        "data": {
+          "from_node": "loadstac1"
+        },
+        "extent": {
+          "from_parameter": "bbox"
+        }
+      }
+    },
+    "applydimension1": {
+      "process_id": "apply_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "filterbbox1"
+        },
+        "dimension": "bands",
+        "process": {
+          "process_graph": {
+            "runudf1": {
+              "process_id": "run_udf",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "runtime": "Python",
+                "udf": "import os, sys\nimport pandas as pd\nimport numpy as np\nimport xarray as xr\nimport re\nfrom typing import Dict, List, Tuple, Union\nfrom openeo.udf import inspect\nfrom datetime import datetime\nfrom openeo.metadata import CubeMetadata\n\n#ToDo Clean and add more comments\n\ndef apply_metadata(metadata: CubeMetadata, context:dict) -> CubeMetadata:\n    \"\"\" Rename the bands by using openeo apply_metadata function\n    :param metadata: Metadata of the input data cube\n    :param context: Context of the UDF\n    :return: renamed labels\n    \"\"\"\n    return metadata.rename_labels(dimension=\"bands\", target=['EUNIS habitat level3'])\n\ndef _get_metadata(l1_classes, l1_values, l2_classes, l2_values, l3_classes, l3_values) -> Dict:\n    attrs = {}\n    attrs['eunis habitats L1'] = \"\"\n    for idx, l1 in enumerate(l1_classes):\n        attrs['eunis habitats L1'] += l1+':'+str(l1_values[idx])+', '\n    attrs['eunis habitats L2'] = \"\"\n    for idx, l2 in enumerate(l2_classes):\n        attrs['eunis habitats L2'] += l2+':'+str(l2_values[idx])+','\n    attrs['eunis habitats L3'] = \"\"\n    for idx, l3 in enumerate(l3_classes):\n        attrs['eunis habitats L3'] += l3+':'+str(l3_values[idx])+','\n\n    return attrs\n\ndef _create_output_xarray(output_ar: np.ndarray, input_xr: xr.DataArray) -> xr.DataArray:\n    return xr.DataArray(\n        output_ar,\n        dims=[\"bands\",\"y\",\"x\"],\n        coords={\"bands\":range(1),\"y\":input_xr.coords[\"y\"], \"x\":input_xr.coords[\"x\"]},\n    )\n\ndef _select_highest_prob_class(cube: xr.DataArray, raster_codes) -> xr.DataArray:\n    \"\"\" Select per model the highest probability of occurrence class\n    :param cube: data cube with probabilities for all classes of three levels\n    :param raster_codes: dataframe with raster code values\n    :return: data cube with highest probably of occurrence class per model (level)\n    \"\"\"\n    # Identify the band with the highest probability for each pixel\n    cube= cube.fillna(0)  #make sure argmax is not returning all slice N/A\n    try:\n        max_band = cube.dropna(dim=\"bands\", how='all').argmax(axis=0)  # Index of max value, OpenEO need bands ?\n    except Exception as e:\n        inspect(message=f\"EXCEPTION {e} in argmax for {raster_codes}\")\n\n    # Map max_band indices to corresponding raster codes\n    selected_raster_code = np.choose(max_band, raster_codes)\n\n    # Return selected highest eunis habitat (raster value) for given level\n    return selected_raster_code\n\ndef _merge_hierarchical(cube: xr.DataArray, df, df_high_prob) -> xr.DataArray:\n    # currently band names are pushed in attributes.\n    #if len(df_high_prob) != len(cube.attrs[\"bands\"].split(',')):\n    #    inspect(message=f\"EXCEPTION mismatch in highest probability cube per group\")\n\n    #print('+ get level1 to start with')\n    inspect(message=f\"+ merge hierarchical Level 1\")\n    #select the first band from the cube, this is level-1\n    aData = cube.isel(bands=[0])  #.to_numpy()[0] not supported in OpenEO\n\n    #print('+ imprint Level2 data into Level1 classes')\n    inspect(message=f\"+ merge hierarchical Level 2\")\n    l1_classes = df[df.level == '1']['habitat'].unique().tolist()\n    l1_values = df[df.level == '1']['raster_code'].unique().tolist()\n    l2_classes = df[df.level == '2']['habitat'].unique().tolist()\n    l2_values = df[df.level == '2']['raster_code'].unique().tolist()\n\n    # get list of Level2 files for this tile which can be imprinted\n    # use of 'df' --> so based on for which level 2 classes a model was built!\n    df_l2 = df_high_prob[(df_high_prob.level == '2')]\n    #l2_class_unique = df_l2['sub_class'].unique()\n    l2_class_unique = [l2_class for l2_class in l2_classes if l2_class[0] in [l1_class[0] for l1_class in l1_classes]]\n\n    if not df_l2.empty:\n        # now we run over each of this Level 2 raster to imprint into Level1\n        for row in df_l2.itertuples():\n            #print(f'++ retrieve & imprint data for Level 1 {row.model}')\n            aImprint = cube.isel(bands=[row.Index])  #.to_numpy()[0] not supported in OpenEO\n            nodata = [0 , -1]\n\n            # get the Level 1 habitat code from the level 2 data\n            lsub = np.unique(aImprint).tolist()\n            lsub = [x for x in lsub if x not in nodata]\n            if nodata in lsub: lsub.remove(nodata)\n            if np.nan in lsub: lsub.remove(np.nan)\n            lsub = [*set([int(np.floor(x / 10000) * 10000) for x in lsub])]\n\n            if len(lsub) != 1:\n                raise RuntimeError(\n                    f'level2 sub-class results should only belong to ONE level 1 class. level 2 results of file {row.path} belong to {len(lsub)} level 1 classes ({lsub}).')\n            # if we have this error then check if the classified tile is containing data, probably there is 'nodata' involved in the issue.\n\n            # now imprint the data into level 1\n            #aData[aData == lsub[0]] = aImprint[aData == lsub[0]]  #multi-boolean indexing not supported in xarray\n            aData = xr.where(aData == lsub[0], aImprint, aData)\n            # free\n            aImprint = None\n\n    #print('+ imprint Level3 data into Level2 classes')\n    inspect(message=f\"+ merge hierarchical Level 3\")\n    l3_classes = df[df.level == '3']['habitat'].unique().tolist()\n    l3_values = df[df.level == '3']['raster_code'].unique().tolist()\n\n    # get list of Level3 files for this tile which can be imprinted\n    # use of 'df' --> so based on for which level 2 classes a model was built!\n    df_l3 = df_high_prob[(df_high_prob.level == '3')]\n    #l2_class_unique = df_l2['sub_class'].unique()\n    l3_class_unique = [l3_class for l3_class in l3_classes if l3_class[0] in [l2_class[0] for l2_class in l2_classes]]\n\n    if not df_l3.empty:\n        # now we run over each of this Level 3 raster to imprint into Level1\n        for row in df_l3.itertuples():\n            #print(f'++ retrieve & imprint data for Level 3 {row.model}')\n            aImprint = cube.isel(bands=[row.Index])\n            nodata = [0 , -1]\n\n            # get the Level 2 habitat code from the level 3 data\n            lsub = np.unique(aImprint).tolist()\n            lsub = [x for x in lsub if x not in nodata]\n            if nodata in lsub: lsub.remove(nodata)\n            if np.nan in lsub: lsub.remove(np.nan)\n            lsub = [*set([int(np.floor(x / 100) * 100) for x in lsub])]\n\n            if len(lsub) != 1:\n                raise RuntimeError(\n                    f'level3 sub-class results should only belong to ONE level 2 class. level 3 results of file {row.model} belong to {len(lsub)} level 2 classes ({lsub}).')\n            # if we have this error then check if the classified tile is containing data, probably there is 'nodata' involved in the issue.\n\n            # now imprint the data into level 2\n            #aData[aData == lsub[0]] = aImprint[aData == lsub[0]]\n            aData = xr.where(aData == lsub[0], aImprint, aData)\n            # free\n            aImprint = None\n\n    #to keep the spatial dimensions, we take a copy of cube (first band) and imprint the results\n    #eunis_cube = cube.isel(bands=[0])\n    #eunis_cube[0] = aData\n    eunis_cube = aData\n\n    eunis_cube.attrs = _get_metadata(l1_classes, l1_values, l2_classes, l2_values, l3_classes, l3_values)\n    #eunis_cube = xr.set_options() set_nodata(eunis_cube, 0)\n\n    return eunis_cube\n\ndef parse_prob_classes_fromStac(band_names):\n\n    band_info = []\n    pattern = re.compile(r\"Level([\\w\\d]+)_class-([\\w\\d]+)_habitat-([\\w\\d]+)-(\\d+)\")\n    for band_nr, band_name in enumerate(band_names, start=1):\n        match = pattern.search(band_name.replace(\" \", \"\"))  # make sure no white spaces pending\n        if match:\n            level, class_name, habitat, raster_code = match.groups()\n            band_info.append((band_nr, level, class_name, habitat, int(raster_code)))\n        else:\n            print('skipping {}'.format(band_name))\n    # Create DataFrame\n    df = pd.DataFrame(band_info, columns=[\"band_nr\", \"level\", \"model\", \"habitat\", \"raster_code\"])\n\n    return df\n\ndef apply_datacube(cube: xr.DataArray, context:Dict) -> xr.DataArray:\n    inspect(message=f\"xarray dims {cube.dims}\")\n    # fill nan in cube and make sure the cube is in the right dtype\n    max_cube_initialized = False\n\n    ### get the list of classes as output from inference run\n    # use returned metadata to build up the class dictionary\n    inspect(message=cube.indexes[\"bands\"].values)\n    df = parse_prob_classes_fromStac(cube.indexes[\"bands\"].values)\n\n    inspect(message=f\"## context parameters\")\n    inspect(message=f\"{df}\")\n\n    ### Determine first the highest probability per model (leveled)\n    inspect(message=f\"## determine highest probability per model/level\")\n\n    # read in the selected band names from the raster stack (per level and class)\n    for (level, class_name), group in df.groupby([\"level\", \"model\"]):\n\n        band_indices = group[\"band_nr\"].values - 1  # Convert to 0-based index\n        raster_codes = group[\"raster_code\"].values\n\n        #inspect(message=f\"processing level:group {level}:{class_name} with bands: {band_indices}\")\n        subset_cube = cube.isel(bands=list(band_indices))\n        max_probability = _select_highest_prob_class(subset_cube, raster_codes)\n        #max_level_cube = create_output_xarray(max_probability, subset_cube)\n\n        if not max_cube_initialized:\n            # Iniitialize the output cube only on the first iteration\n            max_cube = max_probability\n            band_names = [class_name]\n            max_cube_initialized = True\n        else:\n            # Append the result in the output cube\n            max_cube = xr.concat([max_cube, max_probability], dim=\"bands\")\n            band_names.append(class_name)\n\n    #TODO assign names to bands via data variables iso attributes\n    #max_cube = max_cube.assign_attrs(bands=\",\".join(str(x) for x in band_names))\n    # create new dataframe with bands from highest_prob\n    df_high_prob = pd.DataFrame({'count':df.groupby([\"level\",\"model\"]).size()}).reset_index(level=[\"model\",\"level\"])\n\n    ### Merge highest probability classes in hierarchical way\n    inspect(message=f\"## merge highest probabilities\")\n    max_cube = _merge_hierarchical(max_cube, df, df_high_prob)\n    # make sure the output Xarray has set correct dtype (not float64)\n    max_cube = max_cube.astype(\"uint32\")\n\n    return max_cube"
+              },
+              "result": true
+            }
+          }
+        }
+      }
+    },
+    "saveresult1": {
+      "process_id": "save_result",
+      "arguments": {
+        "data": {
+          "from_node": "applydimension1"
+        },
+        "format": "GTiff",
+        "options": {
+          "separate_asset_per_band": false,
+          "filename_prefix": {"from_node": "textconcat4"},
+          "file_metadata": {
+            "copyright": "WEED project 2024 / Contains modified Copernicus Sentinel data processed by WEED consortium",
+            "creation_time": "2025-06-11T12:54:20Z",
+            "processing_platform": "openEO platform - client version: 0.40.0",
+            "PROCESSING_SOFTWARE": "eo_processing, version 0.2.17",
+            "references": "https://esa-worldecosystems.org/",
+            "producer": "VITO NV",
+            "description": "EUNIS habitat map level3 (highest probability of occurrence).",
+            "tiling_grid": "Global_20km",
+            "product_tile": {"from_parameter": "area_name"},
+            "time_start": {"from_node": "textconcat1"},
+            "time_end": {"from_node": "textconcat2"}
+          }
+        }
+      }
+    },
+    "textconcat1": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          {
+            "from_parameter": "digitalId"
+          },
+          {
+            "from_parameter": "scenarioId"
+          }
+        ],
+        "separator": "-"
+      }
+    },
+     "textconcat2": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          {
+            "from_parameter": "year"
+          },
+          "01",
+          "01T00:00:00Z"
+        ],
+        "separator": "-"
+      }
+    },
+    "textconcat3": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          {
+            "from_parameter": "year"
+          },
+          "12",
+          "31T23:59:59Z"
+        ],
+        "separator": "-"
+      }
+    },
+    "textconcat4": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          "Alpha3_EUNIS-extent-map_year",
+          {"from_parameter": "year"},
+          "_",
+          {"from_parameter": "area_name"},
+          "_",
+          {"from_parameter": "scenarioId"}]
+      }
+    },
+    "textconcat5": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          "https://catalogue.weed.apex.esa.int/collections",
+          {"from_node": "textconcat1"}
+        ],
+        "separator": "/"
+        }
+    },
+    "textconcat6": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          {"from_node": "textconcat1"},
+          "postprocessed"
+        ],
+        "separator": "-"
+        }
+    },
+    "exportworkspace1": {
+      "process_id": "export_workspace",
+      "arguments": {
+        "data": {
+          "from_node": "saveresult1"
+        },
+        "merge": {
+          "from_node": "textconcat6"
+        },
+        "workspace": "esa-weed-apex-stac-api-workspace"
+      },
+      "result": true
+    }
+  },
+  "id": "udp_eunis_mixer_alpha3",
+  "summary": "Generates the alpha 3 eunix extent map result based on highest probabilities.",
+  "description": "EUNIS hierarchical mixer for the habitat maps for the alpha3 release.",
+  "default_job_options": {
+    "driver-memory": "4G",
+    "driver-memoryOverhead": "4G",
+    "driver-cores": "1",
+    "executor-memory": "4G",
+    "executor-memoryOverhead": "2500m",
+    "executor-cores": "1",
+    "max-executors": "25",
+    "soft-errors": "true",
+    "python-memory": "5G",
+    "logging-threshold": "debug",
+    "allow_empty_cubes": true,
+    "export-workspace-enable-merge": true,
+    "etl_organization_id": "4938"
+  },
+  "parameters": [
+    {
+      "name": "bbox",
+      "description": "Limits the data to process to the specified bounding box or polygons.\n\nFor raster data, the process loads the pixel into the data cube if the point\n\n    at the pixel center intersects with the bounding box or any of the polygons\n(as defined in the Simple Features standard by the OGC).\n\nFor vector data, \n    the process loads the geometry into the data cube if the geometry\nis fully within the bounding box or any of the polygons (as defined in the\nSimple \n    Features standard by the OGC). Empty geometries may only be in the\ndata cube if no spatial extent has been provided.\n\nEmpty geometries are ignored.\n\nSet this parameter to null to set no limit for the spatial extent.",
+      "schema": {
+        "title": "Bounding Box",
+        "type": "object",
+        "subtype": "bounding-box",
+        "required": [
+          "west",
+          "south",
+          "east",
+          "north"
+        ],
+        "properties": {
+          "west": {
+            "description": "West (lower left corner, coordinate axis 1).",
+            "type": "number"
+          },
+          "south": {
+            "description": "South (lower left corner, coordinate axis 2).",
+            "type": "number"
+          },
+          "east": {
+            "description": "East (upper right corner, coordinate axis 1).",
+            "type": "number"
+          },
+          "north": {
+            "description": "North (upper right corner, coordinate axis 2).",
+            "type": "number"
+          },
+          "crs": {
+            "description": "Coordinate reference system of the extent, specified as as [EPSG code](http://www.epsg-registry.org/) or [WKT2 CRS string](http://docs.opengeospatial.org/is/18-010r7/18-010r7.html).",
+            "anyOf": [
+              {
+                "title": "EPSG Code",
+                "type": "integer",
+                "subtype": "epsg-code",
+                "minimum": 1000,
+                "examples": [
+                  3035
+                ]
+              },
+              {
+                "title": "WKT2",
+                "type": "string",
+                "subtype": "wkt2-definition"
+              }
+            ],
+            "default": 3035
+          }
+        }
+      }
+    },
+    {
+      "name": "year",
+      "description": "The year for which to generate the habitat map. (default: 2024)",
+      "schema": {
+        "type": "integer"
+      },
+      "default": 2024,
+      "optional": true
+    },
+    {
+      "name": "digitalId",
+      "description": "Digital ID of client",
+      "schema": {
+        "type": "string"
+      }
+    },
+    {
+      "name": "scenarioId",
+      "description": "Id of the scenario/session",
+      "schema": {
+        "type": "string"
+      }
+    },
+    {
+      "name": "area_name",
+      "description": "Name of the AOI",
+      "schema": {
+        "type": "string"
+      },
+      "optional": true,
+      "default": "AOI"
+    }
+  ]
+}
