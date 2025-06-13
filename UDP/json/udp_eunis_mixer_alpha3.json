@@ -139,7 +139,7 @@
       "arguments": {
         "data": [
           {"from_node": "textconcat1"},
-          "postprocessed"
+          "inference"
         ],
         "separator": "-"
         }
