@@ -152,7 +152,8 @@ job_options.update({"driver-memory": "4G",
                     "executor-memory": "2G",
                     "executor-memoryOverhead": "2500m",
                     "python-memory": "5G",
-                    "logging-threshold": "debug"})
+                    "logging-threshold": "debug",
+                    "max-executors": "10"})
 #### end of delete
 
 #### create-on-demand the feature datacube
