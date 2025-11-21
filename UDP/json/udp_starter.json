@@ -88,7 +88,7 @@
       "result": true
     }
   },
-  "process_id": "starter",
+  "process_id": "udp_starter",
   "summary": "Generates the starter script for Aries.",
   "description": "UDP starter.",
   "default_job_options": {
