@@ -1,0 +1,196 @@
+{
+  "process_graph": {
+    "textconcat1": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          {
+            "from_parameter": "digitalId"
+          },
+          {
+            "from_parameter": "scenarioId"
+          }
+        ],
+        "separator": "-"
+      }
+    },
+    "loadgeojson1": {
+      "process_id": "load_geojson",
+      "arguments": {
+        "data": {
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                  [
+                    [
+                      -74.03,
+                      40
+                    ],
+                    [
+                      -74.0,
+                      40
+                    ],
+                    [
+                      -74.0,
+                      40.03
+                    ],
+                    [
+                      -74.03,
+                      40.03
+                    ],
+                    [
+                      -74.03,
+                      40
+                    ]
+                  ]
+                ]
+              },
+              "properties": {
+                "digitalId": {"from_parameter": "digitalId"},
+                "scenarioId": {"from_parameter": "scenarioId"},
+                "onnx_model": {"from_parameter": "onnx_model"},
+                "year": {"from_parameter": "year"},
+                "spatial_extent": {"from_parameter": "bbox"}
+              }
+            }
+          ]
+        },
+        "properties": []
+      }
+    },
+    "saveresult1": {
+      "process_id": "save_result",
+      "arguments": {
+        "data": {
+          "from_node": "loadgeojson1"
+        },
+        "format": "geojson",
+        "options": {
+          "filename_prefix": {
+            "from_node": "textconcat1"
+          }
+        }
+      }
+    },
+    "exportworkspace1": {
+      "process_id": "export_workspace",
+      "arguments": {
+        "data": {
+          "from_node": "saveresult1"
+        },
+        "merge": "test_bert_vector",
+        "workspace": "esa-weed-test-workspace"
+      },
+      "result": true
+    }
+  },
+  "process_id": "starter",
+  "summary": "Generates the starter script for Aries.",
+  "description": "UDP starter.",
+  "default_job_options": {
+    "driver-memory": "512m",
+    "driver-memoryOverhead": "512m",
+    "executor-memory": "512m",
+    "executor-memoryOverhead": "512m",
+    "logging-threshold": "debug",
+    "etl_organization_id": "4938"
+  },
+  "parameters": [
+    {
+      "name": "bbox",
+      "description": "Limits the data to process to the specified bounding box or polygons.\n\nFor raster data, the process loads the pixel into the data cube if the point\n\n    at the pixel center intersects with the bounding box or any of the polygons\n(as defined in the Simple Features standard by the OGC).\n\nFor vector data, \n    the process loads the geometry into the data cube if the geometry\nis fully within the bounding box or any of the polygons (as defined in the\nSimple \n    Features standard by the OGC). Empty geometries may only be in the\ndata cube if no spatial extent has been provided.\n\nEmpty geometries are ignored.\n\nSet this parameter to null to set no limit for the spatial extent.",
+      "schema": {
+        "title": "Bounding Box",
+        "type": "object",
+        "subtype": "bounding-box",
+        "required": [
+          "west",
+          "south",
+          "east",
+          "north"
+        ],
+        "properties": {
+          "west": {
+            "description": "West (lower left corner, coordinate axis 1).",
+            "type": "number"
+          },
+          "south": {
+            "description": "South (lower left corner, coordinate axis 2).",
+            "type": "number"
+          },
+          "east": {
+            "description": "East (upper right corner, coordinate axis 1).",
+            "type": "number"
+          },
+          "north": {
+            "description": "North (upper right corner, coordinate axis 2).",
+            "type": "number"
+          },
+          "crs": {
+            "description": "Coordinate reference system of the extent, specified as as [EPSG code](http://www.epsg-registry.org/) or [WKT2 CRS string](http://docs.opengeospatial.org/is/18-010r7/18-010r7.html).",
+            "anyOf": [
+              {
+                "title": "EPSG Code",
+                "type": "integer",
+                "subtype": "epsg-code",
+                "minimum": 1000,
+                "examples": [
+                  3035
+                ]
+              },
+              {
+                "title": "WKT2",
+                "type": "string",
+                "subtype": "wkt2-definition"
+              }
+            ],
+            "default": 3035
+          }
+        }
+      }
+    },
+    {
+      "name": "year",
+      "description": "The year for which to generate the habitat map. (default: 2024)",
+      "schema": {
+        "type": "integer"
+      },
+      "default": 2024,
+      "optional": true
+    },
+    {
+      "name": "onnx_model",
+      "description": "ONNX model path or identifier",
+      "schema": {
+        "type": "string"
+      }
+    },
+    {
+      "name": "digitalId",
+      "description": "Digital ID of client",
+      "schema": {
+        "type": "string"
+      }
+    },
+    {
+      "name": "scenarioId",
+      "description": "Id of the scenario/session",
+      "schema": {
+        "type": "string"
+      }
+    },
+    {
+      "name": "area_name",
+      "description": "Name of the AOI",
+      "schema": {
+        "type": "string"
+      },
+      "optional": true,
+      "default": "AOI"
+    }
+  ]
+}
