@@ -1,85 +1,108 @@
 """
 UDP to run the inference module on openEO with given DataCube and ML model
 This version for the alpha2 release. There are a few limitation
-1) The text_concat on the filename prefix is not seriazable somehow in the save_results node, so needs to be adapted manually in the json.
-        add module in json
-    "textconcat2": {
+1) at moment just replace whole grpah with
+{
+    "textconcat1": {
       "process_id": "text_concat",
       "arguments": {
         "data": [
           {
-            "from_parameter": "year"
+            "from_parameter": "digitalId"
           },
-          "01",
-          "01T00:00:00Z"
-        ],
-        "separator": "-"
-      }
-    },
-    "textconcat3": {
-      "process_id": "text_concat",
-      "arguments": {
-        "data": [
           {
-            "from_parameter": "year"
-          },
-          "12",
-          "31T23:59:59Z"
+            "from_parameter": "scenarioId"
+          }
         ],
         "separator": "-"
       }
     },
-        "textconcat4": {
-      "process_id": "text_concat",
+    "loadgeojson1": {
+      "process_id": "load_geojson",
       "arguments": {
-        "data": [
-          "Alpha3_EUNIS-extent-map_year",
-          {"from_parameter": "year"},
-          "_",
-          {"from_parameter": "area_name"},
-          "_",
-          {"from_parameter": "scenarioId"}]
+        "data": {
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                  [
+                    [
+                      -74.03,
+                      40
+                    ],
+                    [
+                      -74.0,
+                      40
+                    ],
+                    [
+                      -74.0,
+                      40.03
+                    ],
+                    [
+                      -74.03,
+                      40.03
+                    ],
+                    [
+                      -74.03,
+                      40
+                    ]
+                  ]
+                ]
+              },
+              "properties": {
+                "digitalId": {"from_parameter": "digitalId"},
+                "scenarioId": {"from_parameter": "scenarioId"},
+                "onnx_model": {"from_parameter": "onnx_model"},
+                "year": {"from_parameter": "year"},
+                "spatial_extent": {"from_parameter": "bbox"}
+              }
+            }
+          ]
+        },
+        "properties": []
       }
     },
-and replace file_name with {"from_node": "textconcat4"} in saveresult1 and as well
-            "product_tile": {"from_parameter": "area_name"},
-            "time_start": {"from_node": "textconcat2"},
-            "time_end": {"from_node": "textconcat3"}
-
-create concat of STAC url
-"textconcat5": {
-      "process_id": "text_concat",
+    "saveresult1": {
+      "process_id": "save_result",
       "arguments": {
-        "data": [
-          "https://catalogue.weed.apex.esa.int/collections/",
-          {"from_node": "textconcat"}
-        ],
-        "separator": "/"
+        "data": {
+          "from_node": "loadgeojson1"
+        },
+        "format": "geojson",
+        "options": {
+          "filename_prefix": {
+            "from_node": "textconcat1"
+          }
         }
+      }
+    },
+    "exportworkspace1": {
+      "process_id": "export_workspace",
+      "arguments": {
+        "data": {
+          "from_node": "saveresult1"
+        },
+        "merge": "test_bert_vector",
+        "workspace": "esa-weed-test-workspace"
+      },
+      "result": true
     }
+  }
 
 
 """
 import os
-import sys
 import pathlib
 import openeo
 import json
-import requests
-import re
-import pandas as pd
-import datetime
-from datetime import datetime, timedelta
-import traceback
-# WEED project developments"
-from openeo.metadata import metadata_from_stac
+
 from openeo.api.process import Parameter
 from openeo.processes import text_concat
 from openeo.rest.udp import build_process_dict
-# TODO remove direct path
-from eo_processing.config import get_job_options, get_collection_options, get_standard_processing_options
-from eo_processing.utils.helper import init_connection, getUDFpath
-from eo_processing.utils.metadata import get_base_metadata
+
 
 # Establish connection to OpenEO instance (note that authentication is not necessary to just build the UDP)
 provider = 'cdse' #this udp works only on cdse
