@@ -183,6 +183,12 @@ param_name = Parameter.string(
     optional = True,
     default = "AOI"
 )
+param_dt_url = Parameter.string(
+    name="dt_url",
+    description="url of the digital twin",
+    optional = True,
+    default = "https://services.integratedmodelling.org/runtime/main/api/v1/dt/ESA_INSTITUTIONAL.rvr3s2juw0"
+)
 
 ###################################
 s3_prefix = text_concat([param_digitalId,param_scenarioId], separator="-")
@@ -211,7 +217,8 @@ geojson = {"type":"FeatureCollection",
                               "scenarioId":"param_scenarioId",
                               "onnx_model": "param_onnx_model",
                               "year" : "param_year",
-                              "spatial_extent" : "param_bbox"
+                              "spatial_extent" : "param_bbox",
+                              "dt_url":"param_dt_url"
                              }}
            ]
           }
@@ -238,7 +245,8 @@ spec = build_process_dict(
         param_onnx_model,
         param_digitalId,
         param_scenarioId,
-        param_name
+        param_name,
+        param_dt_url
     ],
     process_graph=cube_workspace,
     default_job_options=job_options

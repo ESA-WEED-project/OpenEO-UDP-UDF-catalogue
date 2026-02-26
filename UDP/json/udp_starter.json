@@ -54,7 +54,8 @@
                 "scenarioId": {"from_parameter": "scenarioId"},
                 "onnx_model": {"from_parameter": "onnx_model"},
                 "year": {"from_parameter": "year"},
-                "spatial_extent": {"from_parameter": "bbox"}
+                "spatial_extent": {"from_parameter": "bbox"},
+                "dt_url": {"from_parameter": "dt_url"}
               }
             }
           ]
@@ -191,6 +192,15 @@
       },
       "optional": true,
       "default": "AOI"
+    },
+    {
+      "name": "dt_url",
+      "description": "Name of the digital twin",
+      "schema": {
+        "type": "string"
+      },
+      "optional": true,
+      "default": "https://services.integratedmodelling.org/runtime/main/api/v1/dt/ESA_INSTITUTIONAL.rvr3s2juw0"
     }
   ]
 }
