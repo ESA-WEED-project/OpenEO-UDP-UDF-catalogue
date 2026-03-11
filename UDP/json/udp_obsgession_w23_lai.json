@@ -467,7 +467,7 @@
         "period": {
           "from_parameter": "binning_period"
         },
-        "temp_aggregator" : {"from_parameter": "temp_aggregator"},
+        "context" : {"temp_aggregator": {"from_parameter": "temp_aggregator"}},
         "reducer": {
           "process_graph": {
             "median1": {
