@@ -96,7 +96,6 @@
         ]
       }
     },
-
     "resamplespatial2": {
       "process_id": "resample_spatial",
       "arguments": {
@@ -459,33 +458,149 @@
         }
       }
     },
-    "grap1": {
-            "test1": {
-              "process_id": {"from_parameter": "temp_aggregator"},
-              "arguments": {
-                "data": {
-                  "from_parameter": "data"
+        "aggregatetemporalperiod1" : {
+      "process_id" : "aggregate_temporal_period",
+      "arguments" : {
+        "data" : {
+          "from_node" : "mask2"
+        },
+        "period" : {
+          "from_parameter" : "binning_period"
+        },
+        "reducer" : {
+          "process_graph" : {
+            "median1" : {
+              "process_id" : "median",
+              "arguments" : {
+                "data" : {
+                  "from_parameter" : "data"
                 }
               },
-              "result": true
+              "result" : true
             }
           }
-    ,
-    "aggregatetemporalperiod1": {
-      "process_id": "aggregate_temporal_period",
-      "arguments": {
-        "data": {
-          "from_node": "mask2"
-        },
-        "period": {
-          "from_parameter": "binning_period"
-        },
-        "context" : {"temp_aggregator": {"from_parameter": "temp_aggregator"}},
-        "reducer": {"from_node" : "grap1"}
-
         }
-
+      }
     },
+    "aggregatetemporalperiod2" : {
+      "process_id" : "aggregate_temporal_period",
+      "arguments" : {
+        "data" : {
+          "from_node" : "mask2"
+        },
+        "period" : {
+          "from_parameter" : "binning_period"
+        },
+        "reducer" : {
+          "process_graph" : {
+            "mean1" : {
+              "process_id" : "mean",
+              "arguments" : {
+                "data" : {
+                  "from_parameter" : "data"
+                }
+              },
+              "result" : true
+            }
+          }
+        }
+      }
+    },
+    "aggregatetemporalperiod3" : {
+      "process_id" : "aggregate_temporal_period",
+      "arguments" : {
+        "data" : {
+          "from_node" : "mask2"
+        },
+        "period" : {
+          "from_parameter" : "binning_period"
+        },
+        "reducer" : {
+          "process_graph" : {
+            "max1" : {
+              "process_id" : "max",
+              "arguments" : {
+                "data" : {
+                  "from_parameter" : "data"
+                }
+              },
+              "result" : true
+            }
+          }
+        }
+      }
+    },
+    "aggregatetemporalperiod4" : {
+      "process_id" : "aggregate_temporal_period",
+      "arguments" : {
+        "data" : {
+          "from_node" : "mask2"
+        },
+        "period" : {
+          "from_parameter" : "binning_period"
+        },
+        "reducer" : {
+          "process_graph" : {
+            "min1" : {
+              "process_id" : "min",
+              "arguments" : {
+                "data" : {
+                  "from_parameter" : "data"
+                }
+              },
+              "result" : true
+            }
+          }
+        }
+      }
+    },
+    "if1" : {
+      "process_id" : "if",
+      "arguments" : {
+        "accept" : {
+          "from_node" : "aggregatetemporalperiod4"
+        },
+        "value" : false
+      }
+    },
+    "if2" : {
+      "process_id" : "if",
+      "arguments" : {
+        "accept" : {
+          "from_node" : "aggregatetemporalperiod3"
+        },
+        "reject" : {
+          "from_node" : "if1"
+        },
+        "value" : false
+      }
+    },
+    "if3" : {
+      "process_id" : "if",
+      "arguments" : {
+        "accept" : {
+          "from_node" : "aggregatetemporalperiod2"
+        },
+        "reject" : {
+          "from_node" : "if2"
+        },
+        "value" : false
+      }
+    },
+    "if4" : {
+      "process_id" : "if",
+      "arguments" : {
+        "accept" : {
+          "from_node" : "aggregatetemporalperiod1"
+        },
+        "reject" : {
+          "from_node" : "if3"
+        },
+        "value" : false
+      },
+      "result" : true
+    }
+  },
     "loadcollection3": {
       "process_id": "load_collection",
       "arguments": {
@@ -556,7 +671,7 @@
       "process_id": "mask",
       "arguments": {
         "data": {
-          "from_node": "aggregatetemporalperiod1"
+          "from_node": "if4"
         },
         "mask": {
           "from_node": "apply4"
@@ -606,17 +721,6 @@
         }
       }
     },
-    "textconcat1": {
-      "process_id": "text_concat",
-      "arguments": {
-        "data": [
-          "EO4Diversity_LAI_",
-          {"from_parameter": "binning_period"},
-          "_",
-          {"from_parameter": "temp_aggregator"},
-          "_"]
-      }
-    },
     "saveresult1": {
       "process_id": "save_result",
       "arguments": {
@@ -627,12 +731,12 @@
         "options": {
           "file_metadata": {
             "copyright": "OBSGESSION project 2025 / Contains modified Copernicus Sentinel data processed by VITO",
-            "creation_time": "2026-03-11T13:10:52Z",
+            "creation_time": "2026-03-11T15:34:07Z",
             "processing_platform": "openEO platform, {'client': 0.48.0}",
             "EO_PROCESSING_SOFTWARE": "eo_processing, version 0.5.0",
             "producer": "VITO NV",
             "references": "https://obsgession.eu/",
-            "Master-Mind": "Dr. Marcel Buchhorn",
+            "Brain-Box": "Dr. Marcel Buchhorn",
             "description": "Generation of EO4Diversity conform high-resolution temperate forests optimized LAI products based on Sentinel-2 following the OBSGESSION W2.3 benchmarking.",
             "tiling_grid": "LAEA",
             "time_start": {
@@ -657,7 +761,7 @@
       },
       "result": true
     }
-  },
+  ,
   "id": "udp_obsgession_w23_lai",
   "summary": "calculates the LAI datasets for wa certain temporal spatial domain, aggregated to a specific temporal binning period and temporal aggregation function.",
   "description": "EO4Diversity EVI-LAI algorithm to produce the Leaf Area Index product.",
