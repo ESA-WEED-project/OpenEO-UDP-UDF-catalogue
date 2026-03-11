@@ -16,7 +16,7 @@ concat does not work with the current version of openeo. So the filename prefix 
       "process_id": "text_concat",
       "arguments": {
         "data": [
-          "EO4Diversity_LAI",
+          "EO4Diversity_LAI_",
           {"from_parameter": "binning_period"},
           "_",
           {"from_parameter": "param_temp_aggregator"},

@@ -52,7 +52,9 @@
         "projection": {
           "from_parameter": "epsg"
         },
-        "resolution": 1001
+        "resolution": {
+            "from_parameter": "resolution"
+          }
       }
     },
     "loadcollection2": {
@@ -468,7 +470,9 @@
         "reducer": {
           "process_graph": {
             "median1": {
-              "process_id": "median",
+              "process_id": {
+            "from_parameter": "temp_aggregator"
+          },
               "arguments": {
                 "data": {
                   "from_parameter": "data"
@@ -604,7 +608,7 @@
       "process_id": "text_concat",
       "arguments": {
         "data": [
-          "EO4Diversity_LAI",
+          "EO4Diversity_LAI_",
           {"from_parameter": "binning_period"},
           "_",
           {"from_parameter": "temp_aggregator"},
