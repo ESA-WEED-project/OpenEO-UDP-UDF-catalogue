@@ -11,6 +11,18 @@ replace median with
 {
             "from_parameter": "temp_aggregator"
           }
+concat does not work with the current version of openeo. So the filename prefix is adapted manually in the json.
+"textconcat1": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          "EO4Diversity_LAI",
+          {"from_parameter": "binning_period"},
+          "_",
+          {"from_parameter": "param_temp_aggregator"},
+          "_"]
+      }
+    }
 
 """
 import json
@@ -195,13 +207,13 @@ bands_meta = {"LAI": {"description": "LAI",
                               "scale": 1./32.,
                               "offset": 0,
                               "nodata_value": 255}}
-#concat =  text_concat([param_binning_period,param_temp_aggregator],separator="_")
-saved_result = s2_cube.save_result(
+#concat =  text_concat([param_binning_period,param_temp_aggregator],separator="_").__str__()
+saved_result = LAI_cube.save_result(
     format="GTiff",
     options={
     "file_metadata":file_meta,
     "bands_metadata":bands_meta,
-    "filename_prefix":f"EO4Diversity_LAI_concat_"}
+    "filename_prefix":f"_concat_"}
 )
 
 description = """
@@ -221,7 +233,7 @@ spec = build_process_dict(
         param_epsg,
         param_resolution,
     ],
-    process_graph=s2_cube,
+    process_graph=saved_result,
     default_job_options=job_options
 )
 
