@@ -53,8 +53,8 @@
           "from_parameter": "epsg"
         },
         "resolution": {
-            "from_parameter": "resolution"
-          }
+          "from_parameter": "resolution"
+        }
       }
     },
     "loadcollection2": {
@@ -458,149 +458,148 @@
         }
       }
     },
-        "aggregatetemporalperiod1" : {
-      "process_id" : "aggregate_temporal_period",
-      "arguments" : {
-        "data" : {
-          "from_node" : "mask2"
+    "aggregatetemporalperiod1": {
+      "process_id": "aggregate_temporal_period",
+      "arguments": {
+        "data": {
+          "from_node": "mask2"
         },
-        "period" : {
-          "from_parameter" : "binning_period"
+        "period": {
+          "from_parameter": "binning_period"
         },
-        "reducer" : {
-          "process_graph" : {
-            "median1" : {
-              "process_id" : "median",
-              "arguments" : {
-                "data" : {
-                  "from_parameter" : "data"
+        "reducer": {
+          "process_graph": {
+            "median1": {
+              "process_id": "median",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
                 }
               },
-              "result" : true
+              "result": true
             }
           }
         }
       }
     },
-    "aggregatetemporalperiod2" : {
-      "process_id" : "aggregate_temporal_period",
-      "arguments" : {
-        "data" : {
-          "from_node" : "mask2"
+    "aggregatetemporalperiod2": {
+      "process_id": "aggregate_temporal_period",
+      "arguments": {
+        "data": {
+          "from_node": "mask2"
         },
-        "period" : {
-          "from_parameter" : "binning_period"
+        "period": {
+          "from_parameter": "binning_period"
         },
-        "reducer" : {
-          "process_graph" : {
-            "mean1" : {
-              "process_id" : "mean",
-              "arguments" : {
-                "data" : {
-                  "from_parameter" : "data"
+        "reducer": {
+          "process_graph": {
+            "mean1": {
+              "process_id": "mean",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
                 }
               },
-              "result" : true
+              "result": true
             }
           }
         }
       }
     },
-    "aggregatetemporalperiod3" : {
-      "process_id" : "aggregate_temporal_period",
-      "arguments" : {
-        "data" : {
-          "from_node" : "mask2"
+    "aggregatetemporalperiod3": {
+      "process_id": "aggregate_temporal_period",
+      "arguments": {
+        "data": {
+          "from_node": "mask2"
         },
-        "period" : {
-          "from_parameter" : "binning_period"
+        "period": {
+          "from_parameter": "binning_period"
         },
-        "reducer" : {
-          "process_graph" : {
-            "max1" : {
-              "process_id" : "max",
-              "arguments" : {
-                "data" : {
-                  "from_parameter" : "data"
+        "reducer": {
+          "process_graph": {
+            "max1": {
+              "process_id": "max",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
                 }
               },
-              "result" : true
+              "result": true
             }
           }
         }
       }
     },
-    "aggregatetemporalperiod4" : {
-      "process_id" : "aggregate_temporal_period",
-      "arguments" : {
-        "data" : {
-          "from_node" : "mask2"
+    "aggregatetemporalperiod4": {
+      "process_id": "aggregate_temporal_period",
+      "arguments": {
+        "data": {
+          "from_node": "mask2"
         },
-        "period" : {
-          "from_parameter" : "binning_period"
+        "period": {
+          "from_parameter": "binning_period"
         },
-        "reducer" : {
-          "process_graph" : {
-            "min1" : {
-              "process_id" : "min",
-              "arguments" : {
-                "data" : {
-                  "from_parameter" : "data"
+        "reducer": {
+          "process_graph": {
+            "min1": {
+              "process_id": "min",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
                 }
               },
-              "result" : true
+              "result": true
             }
           }
         }
       }
     },
-    "if1" : {
-      "process_id" : "if",
-      "arguments" : {
-        "accept" : {
-          "from_node" : "aggregatetemporalperiod4"
+    "if1": {
+      "process_id": "if",
+      "arguments": {
+        "accept": {
+          "from_node": "aggregatetemporalperiod4"
         },
-        "value" : false
+        "value": false
       }
     },
-    "if2" : {
-      "process_id" : "if",
-      "arguments" : {
-        "accept" : {
-          "from_node" : "aggregatetemporalperiod3"
+    "if2": {
+      "process_id": "if",
+      "arguments": {
+        "accept": {
+          "from_node": "aggregatetemporalperiod3"
         },
-        "reject" : {
-          "from_node" : "if1"
+        "reject": {
+          "from_node": "if1"
         },
-        "value" : false
+        "value": false
       }
     },
-    "if3" : {
-      "process_id" : "if",
-      "arguments" : {
-        "accept" : {
-          "from_node" : "aggregatetemporalperiod2"
+    "if3": {
+      "process_id": "if",
+      "arguments": {
+        "accept": {
+          "from_node": "aggregatetemporalperiod2"
         },
-        "reject" : {
-          "from_node" : "if2"
+        "reject": {
+          "from_node": "if2"
         },
-        "value" : false
+        "value": false
       }
     },
-    "if4" : {
-      "process_id" : "if",
-      "arguments" : {
-        "accept" : {
-          "from_node" : "aggregatetemporalperiod1"
+    "if4": {
+      "process_id": "if",
+      "arguments": {
+        "accept": {
+          "from_node": "aggregatetemporalperiod1"
         },
-        "reject" : {
-          "from_node" : "if3"
+        "reject": {
+          "from_node": "if3"
         },
-        "value" : false
+        "value": false
       },
-      "result" : true
-    }
-  },
+      "result": true
+    },
     "loadcollection3": {
       "process_id": "load_collection",
       "arguments": {
@@ -756,12 +755,14 @@
               "nodata_value": 255
             }
           },
-          "filename_prefix": {"from_node": "textconcat1"}
+          "filename_prefix": {
+            "from_node": "textconcat1"
+          }
         }
       },
       "result": true
     }
-  ,
+  }
   "id": "udp_obsgession_w23_lai",
   "summary": "calculates the LAI datasets for wa certain temporal spatial domain, aggregated to a specific temporal binning period and temporal aggregation function.",
   "description": "EO4Diversity EVI-LAI algorithm to produce the Leaf Area Index product.",
