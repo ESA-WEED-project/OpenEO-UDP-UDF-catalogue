@@ -1,0 +1,303 @@
+{
+  "process_graph": {
+    "loadcollection1": {
+      "process_id": "load_collection",
+      "arguments": {
+        "bands": [
+          "B02",
+          "B04",
+          "B08"
+        ],
+        "featureflags": {
+          "tilesize": 128
+        },
+        "id": "SENTINEL2_L2A",
+        "properties": {
+          "eo:cloud_cover": {
+            "process_graph": {
+              "lte1": {
+                "process_id": "lte",
+                "arguments": {
+                  "x": {
+                    "from_parameter": "value"
+                  },
+                  "y": 95
+                },
+                "result": true
+              }
+            }
+          }
+        },
+        "spatial_extent": {
+          "from_parameter": "aoi"
+        },
+        "temporal_extent": [
+          {
+            "from_parameter": "start_date"
+          },
+          {
+            "from_parameter": "end_date"
+          }
+        ]
+      }
+    },
+    "resamplespatial1": {
+      "process_id": "resample_spatial",
+      "arguments": {
+        "align": "upper-left",
+        "data": {
+          "from_node": "loadcollection1"
+        },
+        "method": "near",
+        "projection": {
+          "from_parameter": "epsg"
+        },
+        "resolution": 1001
+      }
+    },
+    "loadcollection2": {
+      "process_id": "load_collection",
+      "arguments": {
+        "bands": [
+          "SCL"
+        ],
+        "featureflags": {
+          "tilesize": 128
+        },
+        "id": "SENTINEL2_L2A",
+        "properties": {
+          "eo:cloud_cover": {
+            "process_graph": {
+              "lte2": {
+                "process_id": "lte",
+                "arguments": {
+                  "x": {
+                    "from_parameter": "value"
+                  },
+                  "y": 95
+                },
+                "result": true
+              }
+            }
+          }
+        },
+        "spatial_extent": {
+          "from_parameter": "aoi"
+        },
+        "temporal_extent": [
+          {
+            "from_parameter": "start_date"
+          },
+          {
+            "from_parameter": "end_date"
+          }
+        ]
+      }
+    },
+    "resamplespatial2": {
+      "process_id": "resample_spatial",
+      "arguments": {
+        "align": "upper-left",
+        "data": {
+          "from_node": "loadcollection2"
+        },
+        "method": "near",
+        "projection": {
+          "from_parameter": "epsg"
+        },
+        "resolution": 10.0
+      }
+    },
+    "toscldilationmask1": {
+      "process_id": "to_scl_dilation_mask",
+      "arguments": {
+        "data": {
+          "from_node": "resamplespatial2"
+        },
+        "erosion_kernel_size": 3,
+        "kernel1_size": 17,
+        "kernel2_size": 77,
+        "mask1_values": [
+          2,
+          4,
+          5,
+          6,
+          7
+        ],
+        "mask2_values": [
+          3,
+          8,
+          9,
+          10,
+          11
+        ],
+        "scl_band_name": "SCL"
+      }
+    },
+    "renamelabels1": {
+      "process_id": "rename_labels",
+      "arguments": {
+        "data": {
+          "from_node": "toscldilationmask1"
+        },
+        "dimension": "bands",
+        "target": [
+          "S2-CLOUD-MASK"
+        ]
+      }
+    },
+    "mask1": {
+      "process_id": "mask",
+      "arguments": {
+        "data": {
+          "from_node": "resamplespatial1"
+        },
+        "mask": {
+          "from_node": "renamelabels1"
+        }
+      }
+    },
+    "apply1": {
+      "process_id": "apply",
+      "arguments": {
+        "data": {
+          "from_node": "mask1"
+        },
+        "process": {
+          "process_graph": {
+            "linearscalerange1": {
+              "process_id": "linear_scale_range",
+              "arguments": {
+                "inputMax": 65534,
+                "inputMin": 0,
+                "outputMax": 65534,
+                "outputMin": 0,
+                "x": {
+                  "from_parameter": "x"
+                }
+              },
+              "result": true
+            }
+          }
+        }
+      },
+      "result": true
+    }
+  },
+  "id": "test",
+  "summary": "calculates the LAI datasets for wa certain temporal spatial domain, aggregated to a specific temporal binning period and temporal aggregation function.",
+  "description": "EO4Diversity EVI-LAI algorithm to produce the Leaf Area Index product.",
+  "default_job_options": {
+    "driver-memory": "8G",
+    "driver-memoryOverhead": "5G",
+    "driver-cores": 1,
+    "executor-memory": "2000m",
+    "executor-memoryOverhead": "256m",
+    "executor-cores": 1,
+    "max-executors": 25,
+    "soft-errors": "true",
+    "python-memory": "2500m",
+    "logging-threshold": "info"
+  },
+  "parameters": [
+    {
+      "name": "start_date",
+      "description": "Start date of the observation period in format YYYY-MM-DD.",
+      "schema": {
+        "type": "string"
+      }
+    },
+    {
+      "name": "end_date",
+      "description": "End date of the observation period in format YYYY-MM-DD.",
+      "schema": {
+        "type": "string"
+      }
+    },
+    {
+      "name": "binning_period",
+      "description": "The temporal binning period. Please have a look at openeo documentation of the process aggregate_temporal_period for more information",
+      "schema": {
+        "type": "string"
+      },
+      "default": "monthly",
+      "optional": true
+    },
+    {
+      "name": "temp_aggregator",
+      "description": "The temporal aggregation function. Please have a look at openeo documentation of the process aggregate_temporal_period for more information",
+      "schema": {
+        "type": "string"
+      },
+      "default": "mean",
+      "optional": true
+    },
+    {
+      "name": "aoi",
+      "description": "the AOI should be stet as an openEO BBOX dict. It defines the boundaries of the area of interest.\n    The coordinates are given in the order of west, south, east, north.",
+      "schema": {
+        "title": "Bounding Box",
+        "type": "object",
+        "subtype": "bounding-box",
+        "required": [
+          "west",
+          "south",
+          "east",
+          "north"
+        ],
+        "properties": {
+          "west": {
+            "description": "West (lower left corner, coordinate axis 1).",
+            "type": "number"
+          },
+          "south": {
+            "description": "South (lower left corner, coordinate axis 2).",
+            "type": "number"
+          },
+          "east": {
+            "description": "East (upper right corner, coordinate axis 1).",
+            "type": "number"
+          },
+          "north": {
+            "description": "North (upper right corner, coordinate axis 2).",
+            "type": "number"
+          },
+          "crs": {
+            "description": "Coordinate reference system of the extent, specified as as [EPSG code](http://www.epsg-registry.org/) or [WKT2 CRS string](http://docs.opengeospatial.org/is/18-010r7/18-010r7.html).",
+            "anyOf": [
+              {
+                "title": "EPSG Code",
+                "type": "integer",
+                "subtype": "epsg-code",
+                "minimum": 1000,
+                "examples": [
+                  3035
+                ]
+              },
+              {
+                "title": "WKT2",
+                "type": "string",
+                "subtype": "wkt2-definition"
+              }
+            ],
+            "default": 3035
+          }
+        }
+      }
+    },
+    {
+      "name": "epsg",
+      "description": "The desired output projection system.",
+      "schema": {
+        "type": "number"
+      }
+    },
+    {
+      "name": "resolution",
+      "description": "The desired output resolution, specified in units of the projection system.",
+      "schema": {
+        "type": "number"
+      }
+    }
+  ]
+}
