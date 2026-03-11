@@ -96,6 +96,7 @@
         ]
       }
     },
+
     "resamplespatial2": {
       "process_id": "resample_spatial",
       "arguments": {
@@ -458,18 +459,7 @@
         }
       }
     },
-    "aggregatetemporalperiod1": {
-      "process_id": "aggregate_temporal_period",
-      "arguments": {
-        "data": {
-          "from_node": "mask2"
-        },
-        "period": {
-          "from_parameter": "binning_period"
-        },
-        "context" : {"temp_aggregator": {"from_parameter": "temp_aggregator"}},
-        "reducer": {
-          "process_graph": {
+    "grap1": {
             "test1": {
               "process_id": {"from_parameter": "temp_aggregator"},
               "arguments": {
@@ -480,8 +470,21 @@
               "result": true
             }
           }
+    ,
+    "aggregatetemporalperiod1": {
+      "process_id": "aggregate_temporal_period",
+      "arguments": {
+        "data": {
+          "from_node": "mask2"
+        },
+        "period": {
+          "from_parameter": "binning_period"
+        },
+        "context" : {"temp_aggregator": {"from_parameter": "temp_aggregator"}},
+        "reducer": {"from_node" : "grap1"}
+
         }
-      }
+
     },
     "loadcollection3": {
       "process_id": "load_collection",
