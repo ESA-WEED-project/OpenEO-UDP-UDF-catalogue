@@ -652,7 +652,7 @@
       "result": true
     }
   },
-  "id": "test",
+  "id": "udp_obsgession_w23_lai",
   "summary": "calculates the LAI datasets for wa certain temporal spatial domain, aggregated to a specific temporal binning period and temporal aggregation function.",
   "description": "EO4Diversity EVI-LAI algorithm to produce the Leaf Area Index product.",
   "default_job_options": {
