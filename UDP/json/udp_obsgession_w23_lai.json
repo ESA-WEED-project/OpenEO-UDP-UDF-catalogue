@@ -755,6 +755,17 @@
         }
       }
     },
+    "textconcat1": {
+      "process_id": "text_concat",
+      "arguments": {
+        "data": [
+          "EO4Diversity_LAI_",
+          {"from_parameter": "binning_period"},
+          "_",
+          {"from_parameter": "param_temp_aggregator"},
+          "_"]
+      }
+    },
     "saveresult1": {
       "process_id": "save_result",
       "arguments": {
