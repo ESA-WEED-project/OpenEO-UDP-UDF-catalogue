@@ -482,6 +482,15 @@
         }
       }
     },
+    "eq1" : {
+      "process_id" : "eq",
+      "arguments" : {
+        "x" : {
+          "from_parameter" : "binning_period"
+        },
+        "y" : "median"
+      }
+    },
     "aggregatetemporalperiod2": {
       "process_id": "aggregate_temporal_period",
       "arguments": {
@@ -504,6 +513,15 @@
             }
           }
         }
+      }
+    },
+    "eq2" : {
+      "process_id" : "eq",
+      "arguments" : {
+        "x" : {
+          "from_parameter" : "binning_period"
+        },
+        "y" : "mean"
       }
     },
     "aggregatetemporalperiod3": {
@@ -530,6 +548,15 @@
         }
       }
     },
+    "eq3" : {
+      "process_id" : "eq",
+      "arguments" : {
+        "x" : {
+          "from_parameter" : "binning_period"
+        },
+        "y" : "max"
+      }
+    },
     "aggregatetemporalperiod4": {
       "process_id": "aggregate_temporal_period",
       "arguments": {
@@ -554,13 +581,22 @@
         }
       }
     },
+    "eq4" : {
+      "process_id" : "eq",
+      "arguments" : {
+        "x" : {
+          "from_parameter" : "binning_period"
+        },
+        "y" : "min"
+      }
+    },
     "if1": {
       "process_id": "if",
       "arguments": {
         "accept": {
           "from_node": "aggregatetemporalperiod4"
         },
-        "value": false
+        "value": {"from_node": "eq4"}
       }
     },
     "if2": {
@@ -572,7 +608,7 @@
         "reject": {
           "from_node": "if1"
         },
-        "value": false
+        "value": {"from_node": "eq3"}
       }
     },
     "if3": {
@@ -584,7 +620,7 @@
         "reject": {
           "from_node": "if2"
         },
-        "value": false
+        "value": {"from_node": "eq2"}
       }
     },
     "if4": {
@@ -596,7 +632,7 @@
         "reject": {
           "from_node": "if3"
         },
-        "value": false
+        "value": {"from_node": "eq1"}
       }
     },
     "loadcollection3": {
