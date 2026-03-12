@@ -597,8 +597,7 @@
           "from_node": "if3"
         },
         "value": false
-      },
-      "result": true
+      }
     },
     "loadcollection3": {
       "process_id": "load_collection",
