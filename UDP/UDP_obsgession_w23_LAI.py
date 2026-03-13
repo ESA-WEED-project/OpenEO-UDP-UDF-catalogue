@@ -28,7 +28,7 @@ concat does not work with the current version of openeo. So the filename prefix 
 import json
 import openeo
 from openeo.api.process import Parameter
-from openeo.processes import if_, and_, gte, add, text_concat
+from openeo.processes import if_, eq
 from openeo.rest.udp import build_process_dict
 import os
 import pathlib
@@ -175,7 +175,13 @@ LAI_cube = s2_cube.apply_dimension(
 lai_mask = (LAI_cube < 0) | (LAI_cube > 7.5)
 LAI_cube = LAI_cube.mask(lai_mask)
 
-LAI_cube = LAI_cube.aggregate_temporal_period(period=param_binning_period, reducer='median')
+
+LAI_cube = if_(eq(param_temp_aggregator,'median'), LAI_cube.aggregate_temporal_period(period=param_binning_period, reducer='median'),
+    if_(eq(param_temp_aggregator,'mean'), LAI_cube.aggregate_temporal_period(period=param_binning_period, reducer='mean'),
+        if_(eq(param_temp_aggregator,'max'), LAI_cube.aggregate_temporal_period(period=param_binning_period, reducer='max'),
+            if_(eq(param_temp_aggregator,'min'), LAI_cube.aggregate_temporal_period(period=param_binning_period, reducer='min')))))
+
+#LAI_cube = LAI_cube.aggregate_temporal_period(period=param_binning_period, reducer='mean')
 
 # load the WorldCover 2021 for masking to tree cover
 tree_cube = connection.load_collection("ESA_WORLDCOVER_10M_2021_V2",
