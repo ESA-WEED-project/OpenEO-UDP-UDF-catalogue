@@ -596,7 +596,10 @@
         "accept": {
           "from_node": "aggregatetemporalperiod4"
         },
-        "value": {"from_node": "eq4"}
+        "value": {"from_node": "eq4"},
+        "reject": {
+          "from_node": "aggregatetemporalperiod4"
+        }
       }
     },
     "if2": {
