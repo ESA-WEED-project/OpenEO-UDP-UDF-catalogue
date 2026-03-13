@@ -662,7 +662,9 @@
         "projection": {
           "from_parameter": "epsg"
         },
-        "resolution": 1001
+        "resolution": {
+          "from_parameter": "resolution"
+        }
       }
     },
     "dropdimension1": {
