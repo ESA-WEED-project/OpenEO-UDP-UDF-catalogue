@@ -486,7 +486,7 @@
       "process_id" : "eq",
       "arguments" : {
         "x" : {
-          "from_parameter" : "binning_period"
+          "from_parameter" : "temp_aggregator"
         },
         "y" : "median"
       }
@@ -519,7 +519,7 @@
       "process_id" : "eq",
       "arguments" : {
         "x" : {
-          "from_parameter" : "binning_period"
+          "from_parameter" : "temp_aggregator"
         },
         "y" : "mean"
       }
@@ -552,7 +552,7 @@
       "process_id" : "eq",
       "arguments" : {
         "x" : {
-          "from_parameter" : "binning_period"
+          "from_parameter" : "temp_aggregator"
         },
         "y" : "max"
       }
@@ -585,7 +585,7 @@
       "process_id" : "eq",
       "arguments" : {
         "x" : {
-          "from_parameter" : "binning_period"
+          "from_parameter" : "temp_aggregator"
         },
         "y" : "min"
       }
@@ -596,10 +596,7 @@
         "accept": {
           "from_node": "aggregatetemporalperiod4"
         },
-        "value": {"from_node": "eq4"},
-        "reject": {
-          "from_node": "aggregatetemporalperiod4"
-        }
+        "value": {"from_node": "eq4"}
       }
     },
     "if2": {
