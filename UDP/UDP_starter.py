@@ -57,7 +57,8 @@ This version for the alpha2 release. There are a few limitation
                 "scenarioId": {"from_parameter": "scenarioId"},
                 "onnx_model": {"from_parameter": "onnx_model"},
                 "year": {"from_parameter": "year"},
-                "spatial_extent": {"from_parameter": "bbox"}
+                "spatial_extent": {"from_parameter": "bbox"},
+                "dt_url": {"from_parameter": "dt_url"}
               }
             }
           ]

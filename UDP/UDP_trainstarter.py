@@ -59,6 +59,7 @@ This version for the alpha2 release. There are a few limitation
                 "rdm_table": {"from_parameter": "rdm_table"},
                 "year": {"from_parameter": "year"},
                 "spatial_extent": {"from_parameter": "geometry"},
+                "dt_url": {"from_parameter": "dt_url"},
                 "workflow":"training"
               }
             }
