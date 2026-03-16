@@ -3,6 +3,7 @@ UDP to run the inference module on openEO with given DataCube and ML model
 This version for the alpha2 release. There are a few limitation
 1) at moment just replace whole grpah with
 {
+  "process_graph": {
     "textconcat1": {
       "process_id": "text_concat",
       "arguments": {
@@ -57,7 +58,8 @@ This version for the alpha2 release. There are a few limitation
                 "scenarioId": {"from_parameter": "scenarioId"},
                 "rdm_table": {"from_parameter": "rdm_table"},
                 "year": {"from_parameter": "year"},
-                "spatial_extent": {"from_parameter": "geojson"}
+                "spatial_extent": {"from_parameter": "geometry"},
+                "workflow":"training"
               }
             }
           ]
@@ -90,9 +92,79 @@ This version for the alpha2 release. There are a few limitation
       },
       "result": true
     }
-  }
-
-
+  },
+  "id": "udp_trainstarter",
+  "summary": "Generates the training starter script for Aries.",
+  "description": "UDP training starter.",
+  "default_job_options": {
+    "driver-memory": "512m",
+    "driver-memoryOverhead": "512m",
+    "executor-memory": "512m",
+    "executor-memoryOverhead": "512m",
+    "logging-threshold": "debug",
+    "etl_organization_id": "4938"
+  },
+  "parameters": [
+    {
+      "name": "geometry",
+      "description": "GeoJSON Geometry Object.",
+      "schema": {
+        "type": "object",
+        "coordinates": []
+      }
+    },
+    {
+      "name": "year",
+      "description": "The year for which to generate the habitat map. (default: 2024)",
+      "schema": {
+        "type": "integer"
+      },
+      "default": 2024,
+      "optional": true
+    },
+    {
+      "name": "rdm_table",
+      "description": "RDM postGres table name",
+      "schema": {
+        "type": "string"
+      },
+      "default": "global_training",
+      "optional": true
+    },
+    {
+      "name": "digitalId",
+      "description": "Digital ID of client",
+      "schema": {
+        "type": "string"
+      }
+    },
+    {
+      "name": "scenarioId",
+      "description": "Id of the scenario/session",
+      "schema": {
+        "type": "string"
+      }
+    },
+    {
+      "name": "area_name",
+      "description": "Name of the AOI",
+      "schema": {
+        "type": "string"
+      },
+      "optional": true,
+      "default": "AOI"
+    },
+    {
+      "name": "dt_url",
+      "description": "url of the digital twin",
+      "schema": {
+        "type": "string"
+      },
+      "optional": true,
+      "default": "https://services.integratedmodelling.org/runtime/main/api/v1/dt/ESA_INSTITUTIONAL.rvr3s2juw0"
+    }
+  ]
+}
 """
 import os
 import pathlib
