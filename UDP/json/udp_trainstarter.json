@@ -54,7 +54,7 @@
                 "scenarioId": {"from_parameter": "scenarioId"},
                 "rdm_table": {"from_parameter": "rdm_table"},
                 "year": {"from_parameter": "year"},
-                "spatial_extent": {"from_parameter": "geojson"}
+                "spatial_extent": {"from_parameter": "geometry"}
               }
             }
           ]
