@@ -178,6 +178,15 @@
         "type": "string"
       }
     },
+        {
+      "name": "userId",
+      "description": "user Id used to identify the user. (default: anonymous)",
+      "schema": {
+        "type": "string"
+      },
+      "default": "anonymous",
+      "optional": true
+    },
     {
       "name": "scenarioId",
       "description": "Id of the scenario/session",
