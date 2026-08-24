@@ -51,6 +51,7 @@
               },
               "properties": {
                 "digitalId": {"from_parameter": "digitalId"},
+                "userId": {"from_parameter": "userId"},
                 "scenarioId": {"from_parameter": "scenarioId"},
                 "onnx_model": {"from_parameter": "onnx_model"},
                 "year": {"from_parameter": "year"},

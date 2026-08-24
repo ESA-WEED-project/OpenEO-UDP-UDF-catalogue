@@ -54,6 +54,7 @@ This version for the alpha2 release. There are a few limitation
               },
               "properties": {
                 "digitalId": {"from_parameter": "digitalId"},
+                "userId": {"from_parameter": "userId"},
                 "scenarioId": {"from_parameter": "scenarioId"},
                 "onnx_model": {"from_parameter": "onnx_model"},
                 "year": {"from_parameter": "year"},
@@ -167,7 +168,11 @@ param_onnx_model = Parameter.string(
     name="onnx_model",
     description="ONNX model path or identifier",
 )
-
+param_userId = Parameter.string(
+    name="userId",
+    default= "anonymous",
+    description="user Id used to identify the user. (default: anonymous)",
+)
 param_digitalId = Parameter.string(
     name="digitalId",
     description="Digital ID of client",
@@ -214,6 +219,7 @@ geojson = {"type":"FeatureCollection",
                                                                [-74.03, 40]]]
                             },
                "properties": {"digitalId": "param_digitalId" ,
+                              "userId": "param_userId" ,
                               "scenarioId":"param_scenarioId",
                               "onnx_model": "param_onnx_model",
                               "year" : "param_year",
@@ -245,6 +251,7 @@ spec = build_process_dict(
         param_onnx_model,
         param_digitalId,
         param_scenarioId,
+        param_userId,
         param_name,
         param_dt_url
     ],
