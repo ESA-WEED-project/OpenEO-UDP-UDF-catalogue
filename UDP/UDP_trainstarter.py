@@ -159,7 +159,7 @@ job_options = {"driver-memory": "512m",
                     "executor-memoryOverhead": "512m",
                     "logging-threshold": "debug",
                "etl_organization_id": "4938",
-               "export_workspace_enable_merge" : False}
+               "export-workspace-enable-merge" : False}
 
 
 geojson = {"type":"FeatureCollection",
