@@ -100,7 +100,7 @@
     "executor-memoryOverhead": "512m",
     "logging-threshold": "debug",
     "etl_organization_id": "4938",
-    "export-workspace-enable-merge" : "false"
+    "export-workspace-enable-merge" : false
   },
   "parameters": [
     {
