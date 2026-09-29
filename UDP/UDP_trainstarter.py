@@ -57,7 +57,7 @@ This version for the alpha2 release. There are a few limitation
                 "scenarioId": {"from_parameter": "scenarioId"},
                 "rdm_table": {"from_parameter": "rdm_table"},
                 "year": {"from_parameter": "year"},
-                "spatial_extent": {"from_parameter": "geojson"}
+                "spatial_extent": {"from_parameter": "geometry"}
               }
             }
           ]
@@ -158,7 +158,8 @@ job_options = {"driver-memory": "512m",
                     "executor-memory": "512m",
                     "executor-memoryOverhead": "512m",
                     "logging-threshold": "debug",
-               "etl_organization_id": "4938"}
+               "etl_organization_id": "4938",
+               "export_workspace_enable_merge" : False}
 
 
 geojson = {"type":"FeatureCollection",
