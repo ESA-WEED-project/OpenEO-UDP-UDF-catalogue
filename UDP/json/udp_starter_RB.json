@@ -54,6 +54,7 @@
                 "userId": {"from_parameter": "userId"},
                 "scenarioId": {"from_parameter": "scenarioId"},
                 "workflow": "RB",
+                "model": {"from_parameter": "modelId"},
                 "year": {"from_parameter": "year"},
                 "spatial_extent": {"from_parameter": "bbox"},
                 "dt_url": {"from_parameter": "dt_url"}
@@ -184,6 +185,13 @@
     {
       "name": "scenarioId",
       "description": "Id of the scenario/session",
+      "schema": {
+        "type": "string"
+      }
+    },
+        {
+      "name": "modelId",
+      "description": "Id of the model",
       "schema": {
         "type": "string"
       }
